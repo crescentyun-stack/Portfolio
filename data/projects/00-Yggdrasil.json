@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "title": "이그드라실",
   "tagline": "부루마블식 자산 경쟁과 1:1 실시간 대전 '야차'를 결합한 2~4인 온라인 보드게임",
-  "cover": null,
+  "cover": "images/main.png",
   "intent": {
     "text": "UI는 플레이어가 게임과 만나는 접점이지만, 게임의 결과를 정하는 곳은 아닙니다. 이 프로젝트에서 세운 기준은 \"UI는 확정된 결과를 보여주고, 연출이 끝났다는 사실만 알린다\" 였습니다.",
     "verbatim": true
@@ -43,8 +43,13 @@
   ],
   "links": {
     "github": "https://github.com/KooHoo-Dev/3rd-TeamProject-KM",
-    "video": "https://youtu.be/CQVLYCzNcjQ",
-    "extra": []
+    "video": "https://youtu.be/yjuZUbRceaQ",
+    "extra": [
+      {
+        "label": "풀영상",
+        "url": "https://youtu.be/CQVLYCzNcjQ"
+      }
+    ]
   },
   "highlights": [
     {
@@ -53,7 +58,15 @@
       "how": "`OpenShopAsync()`가 `UniTaskCompletionSource`의 Task를 돌려주고, 패널이 꺼지는 `OnDisable`에서 완료합니다. 보물상자·전투 인트로도 `PresentAsync`·`PlayAsync`로 같은 방식이며, 표시 객체는 `Awake`에서 스스로 등록합니다.",
       "why": "닫기 버튼에서 콜백을 부르면 X 버튼 외의 경로로 닫힐 때 진행이 멈춥니다. 패널이 꺼지는 순간을 종료로 보면 빠뜨릴 경로가 적고, 팀원 쪽은 `await` 한 줄로 연결되어 서로의 파일을 고치지 않아도 됐습니다.",
       "section": "3.1 상점",
-      "image": null
+      "image": {
+        "src": "images/shop_equipment.gif",
+        "w": 720,
+        "h": 406,
+        "caption": {
+          "text": "상점 구매",
+          "verbatim": true
+        }
+      }
     },
     {
       "title": "하나로 모은 장비 획득 경로",
@@ -101,7 +114,44 @@
       "section": "6.4 상점에서 연타하면 중복 구매되는 문제"
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "images/shop_equipment.gif",
+      "w": 720,
+      "h": 406,
+      "caption": "상점 구매"
+    },
+    {
+      "src": "images/territory.gif",
+      "w": 800,
+      "h": 450,
+      "caption": "영토 구매"
+    },
+    {
+      "src": "images/gold_card.gif",
+      "w": 800,
+      "h": 450,
+      "caption": "황금카드 연출"
+    },
+    {
+      "src": "images/treasure.gif",
+      "w": 800,
+      "h": 450,
+      "caption": "보물상자 연출"
+    },
+    {
+      "src": "images/yacha_request.gif",
+      "w": 800,
+      "h": 450,
+      "caption": "대결 신청"
+    },
+    {
+      "src": "images/battle_intro.gif",
+      "w": 640,
+      "h": 360,
+      "caption": "전투 인트로"
+    }
+  ],
   "retro": {
     "achieved": [
       "시연 이틀 전 장비 10종 밸런스 변경을 `equipments.tsv` 1개만 바꿔 반영 (C# 변경 0줄)",
@@ -214,29 +264,6 @@
         ]
       },
       {
-        "key": "team",
-        "chapter": "overview",
-        "layout": "full",
-        "tab": "개요",
-        "title": {
-          "text": "1.3 팀 구성과 내 역할",
-          "verbatim": true
-        },
-        "lead": null,
-        "sectionPath": [
-          "1. 프로젝트 개요",
-          "1.3 팀 구성과 내 역할"
-        ],
-        "points": [],
-        "visuals": [
-          {
-            "kind": "table",
-            "n": 1,
-            "fp": "담당|역할"
-          }
-        ]
-      },
-      {
         "key": "ui-rule",
         "chapter": "overview",
         "layout": "full",
@@ -329,6 +356,65 @@
             "kind": "table",
             "n": 1,
             "fp": "|[A] 팀원 매니저 안에 UI 코드를 직접 넣음|[B] 내 UI를 \"열기 함수 / 이벤트\" 뒤에 두고, 팀원은 호출 한 줄만 ✓"
+          }
+        ]
+      },
+      {
+        "key": "ui-screens",
+        "chapter": "screens",
+        "layout": "screens",
+        "tab": "결과",
+        "title": {
+          "text": "3. 시스템 ① 화면과 연출",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "3. 시스템 ① 화면과 연출"
+        ],
+        "points": [],
+        "visuals": [
+          {
+            "kind": "image",
+            "src": "images/shop_equipment.gif",
+            "w": 720,
+            "h": 406,
+            "caption": {
+              "text": "상점 구매",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "3. 시스템 ① 화면과 연출",
+              "3.1 상점"
+            ]
+          },
+          {
+            "kind": "image",
+            "src": "images/territory.gif",
+            "w": 800,
+            "h": 450,
+            "caption": {
+              "text": "영토 구매",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "3. 시스템 ① 화면과 연출",
+              "3.2 건물 구매 팝업"
+            ]
+          },
+          {
+            "kind": "image",
+            "src": "images/gold_card.gif",
+            "w": 800,
+            "h": 450,
+            "caption": {
+              "text": "황금카드 연출",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "3. 시스템 ① 화면과 연출",
+              "3.3 황금카드 연출"
+            ]
           }
         ]
       },
@@ -428,7 +514,7 @@
       {
         "key": "treasure-choice",
         "chapter": "screens",
-        "layout": "full",
+        "layout": "visual",
         "tab": "선택",
         "title": {
           "text": "고민과 선택: 연출이 끝나는 시점을 무엇으로 정할 것인가",
@@ -454,6 +540,20 @@
         ],
         "visuals": [
           {
+            "kind": "image",
+            "src": "images/treasure.gif",
+            "w": 800,
+            "h": 450,
+            "caption": {
+              "text": "보물상자 연출",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "3. 시스템 ① 화면과 연출",
+              "3.4 보물상자 보상 연출"
+            ]
+          },
+          {
             "kind": "table",
             "n": 1,
             "fp": "|[A] 확인 버튼을 눌러야 닫힘|[B] 정해진 순서대로 자동 진행 후 닫힘 ✓"
@@ -463,7 +563,7 @@
       {
         "key": "fight-choice",
         "chapter": "screens",
-        "layout": "full",
+        "layout": "visual",
         "tab": "선택",
         "title": {
           "text": "고민과 선택: 대결 신청 창에 무엇을 보여줄 것인가",
@@ -483,6 +583,20 @@
           }
         ],
         "visuals": [
+          {
+            "kind": "image",
+            "src": "images/yacha_request.gif",
+            "w": 800,
+            "h": 450,
+            "caption": {
+              "text": "대결 신청",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "3. 시스템 ① 화면과 연출",
+              "3.5 대결 신청 UI"
+            ]
+          },
           {
             "kind": "table",
             "n": 1,
