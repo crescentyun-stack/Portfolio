@@ -1,0 +1,785 @@
+{
+  "id": "00-Yggdrasil",
+  "doc": "이그드라실 기술문서.md",
+  "schemaVersion": 2,
+  "title": "이그드라실",
+  "tagline": "부루마블식 자산 경쟁과 1:1 실시간 대전 '야차'를 결합한 2~4인 온라인 보드게임",
+  "cover": null,
+  "intent": {
+    "text": "UI는 플레이어가 게임과 만나는 접점이지만, 게임의 결과를 정하는 곳은 아닙니다. 이 프로젝트에서 세운 기준은 \"UI는 확정된 결과를 보여주고, 연출이 끝났다는 사실만 알린다\" 였습니다.",
+    "verbatim": true
+  },
+  "team": {
+    "type": "team",
+    "size": "3인",
+    "role": "보드 디자인(메인 이미지·지역 아이콘·에셋), UI(상점·구매 팝업·황금카드·보물상자·대결 신청·전투 인트로), VFX, 장비·인벤토리·드롭 데이터"
+  },
+  "meta": [
+    {
+      "label": "장르",
+      "value": "부루마블 + 1:1 실시간 대전 (북유럽 신화 배경)"
+    },
+    {
+      "label": "기간",
+      "value": "2026.08.20 ~ 2026.09.11 (약 3주)"
+    },
+    {
+      "label": "인원",
+      "value": "3인 (시작 4인, 1인 중도 이탈)"
+    },
+    {
+      "label": "환경",
+      "value": "Unity 6 (6000.3.15f1, C#, uGUI), UniTask, DOTween, Odin Inspector, ParrelSync"
+    }
+  ],
+  "tags": [
+    "Unity 6",
+    "C#",
+    "uGUI",
+    "UniTask",
+    "DOTween",
+    "Odin Inspector",
+    "ParrelSync"
+  ],
+  "links": {
+    "github": "https://github.com/KooHoo-Dev/3rd-TeamProject-KM",
+    "video": "https://youtu.be/CQVLYCzNcjQ",
+    "extra": []
+  },
+  "highlights": [
+    {
+      "title": "await 가능한 UI",
+      "what": "상점·보물상자·전투 인트로를 \"끝날 때까지 기다릴 수 있는 함수\"로 만들어, 게임 로직이 UI 내부를 몰라도 `await` 한 줄로 연출이 끝난 뒤 진행하게 했습니다.",
+      "how": "`OpenShopAsync()`가 `UniTaskCompletionSource`의 Task를 돌려주고, 패널이 꺼지는 `OnDisable`에서 완료합니다. 보물상자·전투 인트로도 `PresentAsync`·`PlayAsync`로 같은 방식이며, 표시 객체는 `Awake`에서 스스로 등록합니다.",
+      "why": "닫기 버튼에서 콜백을 부르면 X 버튼 외의 경로로 닫힐 때 진행이 멈춥니다. 패널이 꺼지는 순간을 종료로 보면 빠뜨릴 경로가 적고, 팀원 쪽은 `await` 한 줄로 연결되어 서로의 파일을 고치지 않아도 됐습니다.",
+      "section": "3.1 상점",
+      "image": null
+    },
+    {
+      "title": "하나로 모은 장비 획득 경로",
+      "what": "상점 구매와 보물상자·황금카드 보상이 같은 `TryAddEquipment`를 거쳐, 인벤토리가 가득 찼을 때의 교체 흐름을 한 곳에서 처리했습니다.",
+      "how": "5칸이 가득 차면 새 장비를 `ReplaceDef`에 보관해 교체 대기 상태로 두고, 플레이어가 슬롯을 고르면 `ReplaceAt`, 포기하면 `CancelReplace`합니다. 장착·해제는 서버에 알려 다른 플레이어 화면에도 표시됩니다.",
+      "why": "장비는 야차의 스킬이므로 어떤 장비 5개를 들고 있을지가 곧 전략입니다. 획득을 거부하면 가득 찼을 때 상점·보물이 의미 없어지므로, 교체 대기 상태를 두어 선택을 남겼습니다.",
+      "section": "4.2 인벤토리",
+      "image": null
+    },
+    {
+      "title": "데이터로 조정하는 장비·드롭",
+      "what": "장비 10종과 드롭 확률(획득처 3종 × 등급 3)을 TSV로 분리하고 \"등급 → 장비\" 2단계 추첨으로 만들어, 확률 조정을 코드 수정 없이 했습니다.",
+      "how": "`drop.tsv`의 획득처별 누적 확률로 등급을 정한 뒤, 그 등급의 장비 중 하나를 균등하게 뽑습니다. 보물창고와 황금카드가 같은 `DropService`를 쓰고 데이터 행만 다릅니다.",
+      "why": "장비마다 가중치를 주면 장비를 추가할 때마다 모든 가중치를 다시 맞춰야 합니다. 플레이어가 체감하는 것은 \"전설이 나왔나\"라고 보고, 등급 확률을 한 숫자로 조정하는 방식을 택했습니다.",
+      "section": "4.3 드롭 추첨",
+      "image": null
+    }
+  ],
+  "troubleshooting": [
+    {
+      "title": "팝업 버튼이 전혀 반응하지 않는 문제",
+      "problem": "빌더로 생성한 팝업의 버튼을 눌러도 아무 반응이 없고, 에러 로그도 없었습니다.",
+      "cause": "새로 만든 Canvas에 Graphic Raycaster가 없어, 클릭이 UI에 전달되지 않았습니다.",
+      "solution": "Canvas에 Graphic Raycaster를 추가·활성화했습니다.",
+      "result": "빌더로 만든 팝업의 버튼이 정상 동작했고, 이후 화면부터는 Canvas를 만들 때 Raycaster를 먼저 확인했습니다.",
+      "lesson": "입력이 안 될 때는 코드보다 EventSystem · Raycaster · 가려진 Image(Raycast Target)부터 확인합니다.",
+      "section": "6.1 팝업 버튼이 전혀 반응하지 않는 문제"
+    },
+    {
+      "title": "파티클이 UI 뒤에 가려지거나 위치가 틀어지는 문제",
+      "problem": "보물상자 VFX가 팝업 뒤에 그려져 보이지 않거나, 엉뚱한 위치에서 터졌습니다.",
+      "cause": "Canvas가 Screen Space - Overlay 모드라 월드의 파티클이 항상 UI 뒤에 놓이고, UI 좌표와 월드 좌표가 달라 위치도 맞지 않았습니다.",
+      "solution": "Canvas를 Screen Space - Camera 모드로 바꾸고, 파티클은 팝업 안의 `spawnAnchor` 위치에 생성했습니다.",
+      "result": "등급별 VFX가 보상 아이콘 위, 상자 위치에서 재생됩니다.",
+      "lesson": "UI 위에 3D 이펙트를 올릴 때는 Canvas 렌더 모드가 그리는 순서를 정합니다.",
+      "section": "6.2 파티클이 UI 뒤에 가려지거나 위치가 틀어지는 문제"
+    },
+    {
+      "title": "상점에서 연타하면 중복 구매되는 문제",
+      "problem": "구매 버튼을 빠르게 두 번 누르면 골드가 부족한데도 두 번 구매됐습니다.",
+      "cause": "골드 차감은 서버를 거쳐 돌아와야 반영되는데, 그 사이 두 번째 클릭이 아직 줄지 않은 골드로 자금 확인을 통과했습니다.",
+      "solution": "`isPurchasing` 플래그로 서버의 골드 갱신이 끝날 때까지 다음 구매를 막고, 그동안 BUY 버튼을 비활성화했습니다. `finally`에서 반드시 해제합니다.",
+      "result": "클릭 횟수와 관계없이 구매 1번에 골드 차감 1번입니다.",
+      "lesson": "서버를 거치는 값은 요청을 보낸 순간과 반영된 순간 사이에 틈이 있습니다. 그 틈 동안 같은 입력을 막아야 합니다.",
+      "section": "6.4 상점에서 연타하면 중복 구매되는 문제"
+    }
+  ],
+  "screenshots": [],
+  "retro": {
+    "achieved": [
+      "시연 이틀 전 장비 10종 밸런스 변경을 `equipments.tsv` 1개만 바꿔 반영 (C# 변경 0줄)",
+      "장비 아이콘 추가·교체 3회를 데이터와 이미지만 수정해 반영 (C# 변경 0줄)",
+      "드롭 추첨 코드 1개(`DropService`)를 보물창고·황금카드 2곳이 공유, 확률은 `drop.tsv` 9줄",
+      "팀원 코드 쪽 연결은 상점·전투 인트로 모두 `await` 1줄"
+    ],
+    "regrets": [
+      "구매 팝업의 랜드마크 가격 표시(× 3)가 실제 가격(`config.json` × 4)과 다름",
+      "전투 인트로 길이만큼 서버 타이머가 어긋남 (서버에서 34초로 보정)",
+      "교체 인벤토리에 제한 시간 없음",
+      "드롭에서 뽑힌 등급에 장비가 없으면 오류"
+    ],
+    "plans": [
+      "팝업도 `TerritoryExtensions`의 가격 계산 함수를 그대로 사용해 표시 가격과 차감 가격의 기준을 하나로",
+      "인트로가 끝난 뒤 준비 완료를 보고하고, 서버는 전원 보고 후부터 시간을 재도록 서버 담당과 함께 수정",
+      "일정 시간이 지나면 자동으로 \"교체 포기\" 처리",
+      "등급에 장비가 없으면 낮은 등급으로 다시 뽑고, 데이터를 불러올 때 등급별 장비 수를 검사"
+    ],
+    "section": "7. 돌아보기"
+  },
+  "deck": {
+    "chapters": [
+      {
+        "key": "overview",
+        "title": "프로젝트 개요",
+        "sectionPath": [
+          "1. 프로젝트 개요"
+        ]
+      },
+      {
+        "key": "arch",
+        "title": "전체 구조",
+        "sectionPath": [
+          "2. 전체 구조"
+        ]
+      },
+      {
+        "key": "screens",
+        "title": "시스템 ① 화면과 연출",
+        "sectionPath": [
+          "3. 시스템 ① 화면과 연출"
+        ]
+      },
+      {
+        "key": "equipment",
+        "title": "시스템 ② 장비 · 인벤토리 · 드롭 데이터",
+        "sectionPath": [
+          "4. 시스템 ② 장비 · 인벤토리 · 드롭 데이터"
+        ]
+      },
+      {
+        "key": "collab",
+        "title": "협업 방식",
+        "sectionPath": [
+          "5. 협업 방식"
+        ]
+      },
+      {
+        "key": "trouble",
+        "title": "문제 해결 기록",
+        "sectionPath": [
+          "6. 문제 해결 기록"
+        ]
+      },
+      {
+        "key": "review",
+        "title": "돌아보기",
+        "sectionPath": [
+          "7. 돌아보기"
+        ]
+      }
+    ],
+    "slides": [
+      {
+        "key": "what",
+        "chapter": "overview",
+        "layout": "visual",
+        "tab": "개요",
+        "title": {
+          "text": "1.1 무엇을 만들었나 (What)",
+          "verbatim": true
+        },
+        "lead": {
+          "text": "상대 영토에 도착하면 통행료를 낸 뒤 1:1 횡스크롤 대전 '야차'를 걸어 그 영토를 빼앗을 수 있고, 보드에서 모은 장비가 야차의 스킬이 됩니다.",
+          "verbatim": true
+        },
+        "sectionPath": [
+          "1. 프로젝트 개요",
+          "1.1 무엇을 만들었나 (What)"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "이 프로젝트에서 저는 보드의 전반적인 디자인과 UI, VFX 그리고 장비 및 인벤토리를 담당했습니다.",
+            "verbatim": true
+          },
+          {
+            "label": "",
+            "text": "제가 만든 화면은 이 루프에서 플레이어가 무언가를 얻거나 고르는 순간에 나옵니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "mermaid",
+            "n": 1,
+            "fp": "flowchart LR"
+          }
+        ]
+      },
+      {
+        "key": "team",
+        "chapter": "overview",
+        "layout": "full",
+        "tab": "개요",
+        "title": {
+          "text": "1.3 팀 구성과 내 역할",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "1. 프로젝트 개요",
+          "1.3 팀 구성과 내 역할"
+        ],
+        "points": [],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "담당|역할"
+          }
+        ]
+      },
+      {
+        "key": "ui-rule",
+        "chapter": "overview",
+        "layout": "full",
+        "tab": "개요",
+        "title": {
+          "text": "UI 설계 기준: 왜 이렇게 구현했나",
+          "verbatim": true
+        },
+        "lead": {
+          "text": "이 프로젝트에서 세운 기준은 \"UI는 확정된 결과를 보여주고, 연출이 끝났다는 사실만 알린다\" 였습니다.",
+          "verbatim": true
+        },
+        "sectionPath": [
+          "1. 프로젝트 개요",
+          "1.2 왜 만들었나 (Why)",
+          "UI 설계 기준: 왜 이렇게 구현했나"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "장비 수치는 시연 이틀 전(09-09)에도 10종 전체가 한꺼번에 바뀌었습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "기준|적용"
+          }
+        ]
+      },
+      {
+        "key": "arch-diagram",
+        "chapter": "arch",
+        "layout": "full",
+        "tab": "구조",
+        "title": {
+          "text": "2.1 아키텍처",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "2. 전체 구조",
+          "2.1 아키텍처"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "팀원 시스템에서 내 UI로 들어오는 화살표는 모두 함수 호출 하나 또는 이벤트 하나입니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "mermaid",
+            "n": 1,
+            "fp": "flowchart LR"
+          }
+        ]
+      },
+      {
+        "key": "connect-choice",
+        "chapter": "arch",
+        "layout": "full",
+        "tab": "선택",
+        "title": {
+          "text": "2.4 고민과 선택: 팀원 코드와 어떻게 연결할 것인가",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "2. 전체 구조",
+          "2.4 고민과 선택: 팀원 코드와 어떻게 연결할 것인가"
+        ],
+        "points": [
+          {
+            "label": "얻은 것",
+            "text": "팀원 매니저 쪽에는 await ...OpenShopAsync(), await BattleIntroManager.Instance.PlayAsync() 같은 호출 한 줄씩만 남았습니다.",
+            "verbatim": true
+          },
+          {
+            "label": "감수한 대가",
+            "text": "연결 함수를 만드는 것만큼 \"이 화면은 어떻게 열고, 언제 끝나는지\"를 같이 넘기는 것이 중요했습니다(5.3).",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "|[A] 팀원 매니저 안에 UI 코드를 직접 넣음|[B] 내 UI를 \"열기 함수 / 이벤트\" 뒤에 두고, 팀원은 호출 한 줄만 ✓"
+          }
+        ]
+      },
+      {
+        "key": "shop-code",
+        "chapter": "screens",
+        "layout": "code",
+        "tab": "구현",
+        "title": {
+          "text": "핵심 기능 ① 닫힐 때까지 기다릴 수 있는 상점",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "3. 시스템 ① 화면과 연출",
+          "3.1 상점",
+          "핵심 기능 ① 닫힐 때까지 기다릴 수 있는 상점"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "X 버튼이든 씬 전환이든, 패널이 꺼지는 모든 경로에서 대기를 풀어 보드 진행이 멈추지 않게",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "code",
+            "n": 1,
+            "fp": "// ShopUIController.cs — 상점을 열고, 닫힐 때까지 기다릴 수 있는 Task를 돌려준다"
+          }
+        ]
+      },
+      {
+        "key": "shop-choice",
+        "chapter": "screens",
+        "layout": "full",
+        "tab": "선택",
+        "title": {
+          "text": "고민과 선택: 상점이 열린 동안 보드 진행을 어떻게 멈출 것인가",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "3. 시스템 ① 화면과 연출",
+          "3.1 상점",
+          "고민과 선택: 상점이 열린 동안 보드 진행을 어떻게 멈출 것인가"
+        ],
+        "points": [
+          {
+            "label": "최종 결정",
+            "text": "상점 화면은 헤더·목록·인벤토리를 한 패널로 통합해 두었기 때문에, 패널이 꺼지는 순간을 상점 종료로 보는 것이 가장 빠뜨릴 경로가 적다고 판단했습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "|[A] 닫기 버튼에서 보드 쪽 콜백 호출|[B] 여는 함수가 UniTask를 돌려주고, 패널이 꺼질 때 완료 ✓"
+          }
+        ]
+      },
+      {
+        "key": "treasure-code",
+        "chapter": "screens",
+        "layout": "code",
+        "tab": "구현",
+        "title": {
+          "text": "핵심 기능 ① 자동 진행 팝업",
+          "verbatim": true
+        },
+        "lead": {
+          "text": "확인 버튼 없이 전부 자동으로 진행하고, 끝날 때까지 await할 수 있습니다.",
+          "verbatim": true
+        },
+        "sectionPath": [
+          "3. 시스템 ① 화면과 연출",
+          "3.4 보물상자 보상 연출",
+          "핵심 기능 ① 자동 진행 팝업"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "팝업은 Awake에서 TreasureManager.SetPresenter(this)로 스스로 등록하고 OnDestroy에서 해제합니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "code",
+            "n": 1,
+            "fp": "// TreasureRewardPopupController.cs"
+          }
+        ]
+      },
+      {
+        "key": "treasure-choice",
+        "chapter": "screens",
+        "layout": "full",
+        "tab": "선택",
+        "title": {
+          "text": "고민과 선택: 연출이 끝나는 시점을 무엇으로 정할 것인가",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "3. 시스템 ① 화면과 연출",
+          "3.4 보물상자 보상 연출",
+          "고민과 선택: 연출이 끝나는 시점을 무엇으로 정할 것인가"
+        ],
+        "points": [
+          {
+            "label": "최종 결정",
+            "text": "황금카드의 \"모두 장비 획득\"처럼 여러 명에게 동시에 보상이 가는 경우, 한 사람이라도 확인을 누르지 않으면 전원이 멈춥니다.",
+            "verbatim": true
+          },
+          {
+            "label": "감수한 대가",
+            "text": "교체 화면에는 제한 시간을 넣지 못했습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "|[A] 확인 버튼을 눌러야 닫힘|[B] 정해진 순서대로 자동 진행 후 닫힘 ✓"
+          }
+        ]
+      },
+      {
+        "key": "fight-choice",
+        "chapter": "screens",
+        "layout": "full",
+        "tab": "선택",
+        "title": {
+          "text": "고민과 선택: 대결 신청 창에 무엇을 보여줄 것인가",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "3. 시스템 ① 화면과 연출",
+          "3.5 대결 신청 UI",
+          "고민과 선택: 대결 신청 창에 무엇을 보여줄 것인가"
+        ],
+        "points": [
+          {
+            "label": "최종 결정",
+            "text": "야차에서는 보드에서 모은 장비가 그대로 스킬이 되므로, 결투를 걸지·받을지의 판단 근거는 결국 \"내 장비와 상대 장비\"입니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "|[A] 신청 문구와 버튼만|[B] 양쪽의 초상화 · 닉네임 · 장비 5칸을 VS 구도로 ✓"
+          }
+        ]
+      },
+      {
+        "key": "intro",
+        "chapter": "screens",
+        "layout": "code",
+        "tab": "구현",
+        "title": {
+          "text": "핵심 기능: 등록하고 기다리는 인트로",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "3. 시스템 ① 화면과 연출",
+          "3.6 전투 VS 인트로",
+          "핵심 기능: 등록하고 기다리는 인트로"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "등장 속도·튕김 배율·흔들림 세기는 인스펙터 값으로 열어, 코드 수정 없이 조정했습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "code",
+            "n": 1,
+            "fp": "// BattleIntroManager.cs — 전투 씬의 인트로가 스스로 등록"
+          }
+        ]
+      },
+      {
+        "key": "inventory",
+        "chapter": "equipment",
+        "layout": "code",
+        "tab": "구현",
+        "title": {
+          "text": "핵심 기능: 교체 대기 상태",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "4. 시스템 ② 장비 · 인벤토리 · 드롭 데이터",
+          "4.2 인벤토리",
+          "핵심 기능: 교체 대기 상태"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "야차가 끝나면 팀장의 전투 코드가 LossDurabilityAll()을 호출해 모든 장비의 내구도를 1씩 줄이고, 0이 된 장비는 지운 뒤 뒤쪽 슬롯을 앞으로 당깁니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "code",
+            "n": 1,
+            "fp": "// InventoryManager.cs",
+            "lines": [
+              1,
+              18
+            ]
+          }
+        ]
+      },
+      {
+        "key": "inventory-choice",
+        "chapter": "equipment",
+        "layout": "full",
+        "tab": "선택",
+        "title": {
+          "text": "고민과 선택: 인벤토리가 가득 찼을 때 새 장비를 어떻게 할 것인가",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "4. 시스템 ② 장비 · 인벤토리 · 드롭 데이터",
+          "4.2 인벤토리",
+          "고민과 선택: 인벤토리가 가득 찼을 때 새 장비를 어떻게 할 것인가"
+        ],
+        "points": [
+          {
+            "label": "최종 결정",
+            "text": "그리고 상점 구매와 보물상자·황금카드 보상이 모두 같은 TryAddEquipment를 거치게 해, 가득 찼을 때의 처리를 한 곳에 모았습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "|[A] 획득 거부|[B] 교체 대기 상태로 두고 플레이어가 슬롯 선택 ✓"
+          }
+        ]
+      },
+      {
+        "key": "drop",
+        "chapter": "equipment",
+        "layout": "code",
+        "tab": "구현",
+        "title": {
+          "text": "핵심 기능: 2단계 추첨",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "4. 시스템 ② 장비 · 인벤토리 · 드롭 데이터",
+          "4.3 드롭 추첨",
+          "핵심 기능: 2단계 추첨"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "등급이 정해지면 그 등급의 장비 중 하나를 균등하게 뽑습니다.",
+            "verbatim": false
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "code",
+            "n": 1,
+            "fp": "// DropService.cs — 1단계: 누적 확률로 등급 결정"
+          }
+        ]
+      },
+      {
+        "key": "handoff",
+        "chapter": "collab",
+        "layout": "full",
+        "tab": "구조",
+        "title": {
+          "text": "5.3 화면을 넘기는 방식",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "5. 협업 방식",
+          "5.3 화면을 넘기는 방식"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "화면 하나를 넘길 때 \"어떻게 열고, 언제 끝나고, 얼마나 걸리는지\"까지가 한 묶음이라는 것을 이 과정에서 정리했습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "시기|넘긴 것|생긴 일"
+          }
+        ]
+      },
+      {
+        "key": "ts-raycaster",
+        "chapter": "trouble",
+        "layout": "problem",
+        "tab": "문제 해결",
+        "title": {
+          "text": "6.1 팝업 버튼이 전혀 반응하지 않는 문제",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "6. 문제 해결 기록",
+          "6.1 팝업 버튼이 전혀 반응하지 않는 문제"
+        ],
+        "points": [
+          {
+            "label": "문제",
+            "text": "빌더로 생성한 팝업의 버튼을 눌러도 아무 반응이 없음. 에러 로그도 없음",
+            "verbatim": true
+          },
+          {
+            "label": "원인",
+            "text": "새로 만든 Canvas에 Graphic Raycaster가 없어, 클릭이 UI에 전달되지 않음",
+            "verbatim": true
+          },
+          {
+            "label": "해결",
+            "text": "Canvas에 Graphic Raycaster를 추가·활성화",
+            "verbatim": true
+          },
+          {
+            "label": "결과",
+            "text": "빌더로 만든 팝업의 버튼이 정상 동작. 이후 화면부터는 Canvas를 만들 때 Raycaster를 먼저 확인",
+            "verbatim": true
+          }
+        ],
+        "visuals": []
+      },
+      {
+        "key": "ts-particle",
+        "chapter": "trouble",
+        "layout": "problem",
+        "tab": "문제 해결",
+        "title": {
+          "text": "6.2 파티클이 UI 뒤에 가려지거나 위치가 틀어지는 문제",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "6. 문제 해결 기록",
+          "6.2 파티클이 UI 뒤에 가려지거나 위치가 틀어지는 문제"
+        ],
+        "points": [
+          {
+            "label": "문제",
+            "text": "보물상자 VFX가 팝업 뒤에 그려져 보이지 않거나, 엉뚱한 위치에서 터짐",
+            "verbatim": true
+          },
+          {
+            "label": "원인",
+            "text": "Overlay UI는 카메라 렌더링 이후에 그려지므로 월드의 파티클이 항상 UI 뒤에 놓이고, UI 좌표와 월드 좌표가 달라 위치도 맞지 않음",
+            "verbatim": true
+          },
+          {
+            "label": "해결",
+            "text": "Canvas를 Screen Space - Camera 모드로 바꾸고, 파티클은 팝업 안의 spawnAnchor 위치에 생성",
+            "verbatim": true
+          },
+          {
+            "label": "결과",
+            "text": "등급별 VFX가 보상 아이콘 위, 상자 위치에서 재생됨",
+            "verbatim": true
+          }
+        ],
+        "visuals": []
+      },
+      {
+        "key": "ts-double-buy",
+        "chapter": "trouble",
+        "layout": "problem",
+        "tab": "문제 해결",
+        "title": {
+          "text": "6.4 상점에서 연타하면 중복 구매되는 문제",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "6. 문제 해결 기록",
+          "6.4 상점에서 연타하면 중복 구매되는 문제"
+        ],
+        "points": [
+          {
+            "label": "문제",
+            "text": "구매 버튼을 빠르게 두 번 누르면 골드가 부족한데도 두 번 구매됨",
+            "verbatim": true
+          },
+          {
+            "label": "원인",
+            "text": "골드 차감은 서버를 거쳐 돌아와야 반영되는데, 그 사이 두 번째 클릭이 아직 줄지 않은 골드로 자금 확인을 통과함",
+            "verbatim": true
+          },
+          {
+            "label": "해결",
+            "text": "isPurchasing 플래그로 서버의 골드 갱신이 끝날 때까지 다음 구매를 막고, 그동안 BUY 버튼을 비활성화.",
+            "verbatim": true
+          },
+          {
+            "label": "결과",
+            "text": "클릭 횟수와 관계없이 구매 1번에 골드 차감 1번",
+            "verbatim": true
+          }
+        ],
+        "visuals": []
+      },
+      {
+        "key": "numbers",
+        "chapter": "review",
+        "layout": "full",
+        "tab": "결과",
+        "title": {
+          "text": "7.2 숫자로 본 결과",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "7. 돌아보기",
+          "7.2 숫자로 본 결과"
+        ],
+        "points": [],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "항목|측정 (git 기록 기준)|의미"
+          }
+        ]
+      }
+    ]
+  }
+}

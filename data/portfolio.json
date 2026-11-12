@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12",
+  "generatedAt": "2026-11-13",
   "profile": {
     "name": "윤승민",
     "nameEn": "SeungMin Yun",
@@ -23,11 +23,11 @@
         },
         {
           "text": "`FixedUpdate`에서 놓치던 대시 입력을 `Update`로 옮겨 입력 누락 해결",
-          "project": "1-Just-Shape&Beats"
+          "project": "1-Just-Shapes-And-Beats"
         },
         {
-          "text": "`AudioSource.time`을 되감아 음악 구간을 반복하는 구간 루프",
-          "project": "1-Just-Shape&Beats"
+          "text": "Canvas를 Screen Space - Camera로 바꿔 UI 위에 등급별 VFX 표시",
+          "project": "00-Yggdrasil"
         }
       ]
     },
@@ -40,7 +40,24 @@
         },
         {
           "text": "`StagePhase` 상속으로 앞 패턴 위에 새 코루틴 하나만 더해 패턴 9종 구성",
-          "project": "1-Just-Shape&Beats"
+          "project": "1-Just-Shapes-And-Beats"
+        },
+        {
+          "text": "TSV 한 줄을 `EquipmentDTO` → 읽기 전용 `EquipmentDef`로 바꾸는 장비 데이터",
+          "project": "00-Yggdrasil"
+        }
+      ]
+    },
+    {
+      "name": "UniTask",
+      "evidence": [
+        {
+          "text": "`UniTaskCompletionSource`로 닫힐 때까지 `await`할 수 있는 상점 UI",
+          "project": "00-Yggdrasil"
+        },
+        {
+          "text": "보물상자·전투 인트로 연출을 팀원 코드에 `await` 한 줄로 연결",
+          "project": "00-Yggdrasil"
         }
       ]
     },
@@ -49,11 +66,24 @@
       "evidence": [
         {
           "text": "경고 → 공격 → 소멸 장애물 생명주기를 코루틴 하나로 진행",
-          "project": "1-Just-Shape&Beats"
+          "project": "1-Just-Shapes-And-Beats"
         },
         {
           "text": "보스전 4단계를 `yield return`으로 이어 붙인 연출 시퀀스",
-          "project": "1-Just-Shape&Beats"
+          "project": "1-Just-Shapes-And-Beats"
+        }
+      ]
+    },
+    {
+      "name": "DOTween",
+      "evidence": [
+        {
+          "text": "`DOTween.Sequence`로 정확히 N번 튀는 보물상자 바운스 연출",
+          "project": "00-Yggdrasil"
+        },
+        {
+          "text": "`DORotate`와 `Ease.InOutQuad`로 하늘을 올려다보는 엔딩 카메라 연출",
+          "project": "0-GolfTown"
         }
       ]
     },
@@ -79,22 +109,23 @@
         },
         {
           "text": "구간마다 새 패턴을 하나씩 더하는 튜토리얼 9구간 구성",
-          "project": "1-Just-Shape&Beats"
+          "project": "1-Just-Shapes-And-Beats"
         }
       ]
     },
     {
-      "name": "DOTween",
+      "name": "Git 협업",
       "evidence": [
         {
-          "text": "`DORotate`와 `Ease.InOutQuad`로 하늘을 올려다보는 엔딩 카메라 연출",
-          "project": "0-GolfTown"
+          "text": "하루 1커밋 · 병합 전 main 받기 · 완성 후 병합 공지 규칙으로 3인 팀 작업",
+          "project": "00-Yggdrasil"
         }
       ]
     }
   ],
   "projects": [
     "0-GolfTown",
-    "1-Just-Shape&Beats"
+    "00-Yggdrasil",
+    "1-Just-Shapes-And-Beats"
   ]
 }
