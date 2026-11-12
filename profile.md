@@ -6,12 +6,11 @@
 
 ## 기본 정보
 
-- 이름: 홍길동
-- 영문 이름: Gildong Hong
+- 이름: 윤승민
+- 영문 이름: SeungMin Yun
 - 한 줄 정체성: 구조를 설명할 줄 아는 유니티 클라이언트 개발자
-- 이메일: you@example.com
-- GitHub: https://github.com/your-id
-- 기타 링크: 블로그 https://your-blog.example.com
+- 이메일: crescentyun@gmail.com
+- GitHub: https://github.com/crescentyun-stack
 
 ## 자기소개
 
@@ -25,9 +24,9 @@
 > 강조하고 싶은 기술을 적어 두세요. Claude가 기술 문서에서 **근거를 찾아** "경험 기반" 문장으로 만듭니다.
 > 근거를 찾지 못한 기술은 싣지 않고, 점검 리포트로 알려 줍니다. 비워 두면 문서에서 자동으로 고릅니다.
 
-- Unity
-- C#
-- 디자인 패턴
+- 
+- 
+- 
 
 ## 페이지 설정
 
