@@ -93,22 +93,6 @@ flowchart LR
 
 한 구간 안에서는 같은 음악 구간이 반복되며 패턴을 피하고, 삼각형을 먹을 때마다 곡이 다음 구간으로 넘어가며 패턴이 하나씩 더해집니다.
 
-### 1.5 제공 코드와 내가 작성한 범위
-
-수업 레포(강사 `Initial commit`) 위에서 작업했지만, 게임 폴더(`Just Shape and Beats/`)의 스크립트는 **모두 직접 작성**했습니다. 템플릿의 `9. Utils`(`ComponentPool`, `SimpleInput` 등)는 이 프로젝트에서 쓰지 않았습니다.
-
-| 구분 | 클래스 | 하는 일 |
-|---|---|---|
-| **작성** | `PlayerController` · `PlayerHP` | 이동, 대시 무적, 넉백, 체력 · 피격 무적, 사망 연출 (3장) |
-| **작성** | `WaveTrailEffect` · `EchoPieceController` | 이동 · 대시 잔상 (3.3) |
-| **작성** | `Obstacle` · `CircleObstacle` · `Gear` · `Barrage` | 경고 → 공격 → 소멸 생명주기, 피격 판정 (4장) |
-| **작성** | `BulletMover` · `GearWallMover` · `GearRotator` | 스포너가 붙이는 이동 전용 컴포넌트 (4.2) |
-| **작성** | `StagePhase1` ~ `StagePhase9` | 튜토리얼 구간별 패턴 (4.3, 6.1) |
-| **작성** | `MusicLoopManager` · `StageClear` · `StageTransition` · `WaveEffect` | 음악 구간 루프, 삼각형 획득, 구간 전환 연출 (5장) |
-| **작성** | `BossController` · `TriangleStack` · `FistPunch` · `TempleBuilder` · `CameraForcedDescent` · `LaserBeam` | 보스전 4단계 (6.2) |
-| **작성** | `GameManager` · `LevelManager` · `TransitionManager` · `GameOverManager` · `CreditManager` | 메인 메뉴, 스테이지 선택, 씬 전환, 게임오버, 크레딧 (6.3) |
-| 미사용 | `Music` (초기 버전) · `Player` (빈 클래스) · `SpikeField` | 8.3에서 `MusicLoopManager`로 대체, 정리하지 못하고 남음 (9.3) |
-
 ---
 
 ## 2. 전체 구조
@@ -144,39 +128,34 @@ flowchart TD
 
 ```mermaid
 %%{init: {'theme':'neutral'}}%%
-flowchart LR
+flowchart TB
     subgraph Progress["진행"]
-        direction TB
-        MLM[("MusicLoopManager<br/>구간 번호 · 음악")]
-        Clear["StageClear<br/>삼각형 획득"]
-        ST["StageTransition<br/>전환 연출"]
+        direction LR
+        Clear["StageClear<br/>삼각형 획득"] -- "StartTransition()" --> ST["StageTransition<br/>전환 연출"]
+        ST -- "AdvanceToNextStage()" --> MLM[("MusicLoopManager<br/>구간 번호 · 음악")]
     end
 
     subgraph Pattern["패턴"]
-        direction TB
-        Phase["StagePhase1~9<br/>스포너"]
-        Mover["BulletMover<br/>이동만"]
+        direction LR
+        Phase["StagePhase1~9<br/>스포너"] --> Mover["BulletMover<br/>이동만"]
     end
 
     subgraph Hazard["장애물"]
-        direction TB
+        direction LR
         Ob["Obstacle / CircleObstacle<br/>경고 → 공격 → 소멸"]
     end
 
     subgraph Player["플레이어"]
-        direction TB
+        direction LR
         PC["PlayerController"]
         HP["PlayerHP"]
     end
 
-    MLM -- "spawner.SetActive()" --> Phase
-    Phase -- "OnStagePatternFinished()" --> MLM
-    Phase -- "Instantiate + AddComponent" --> Ob
-    Phase --> Mover
-    Ob -- "KnockbackCoroutine()" --> PC
-    Ob -- "TakeDamage()" --> HP
-    Clear -- "StartTransition()" --> ST
-    ST -- "AdvanceToNextStage()" --> MLM
+    Progress -- "spawner.SetActive()" --> Pattern
+    Pattern -- "OnStagePatternFinished()" --> Progress
+    Pattern -- "Instantiate + AddComponent" --> Hazard
+    Hazard -- "KnockbackCoroutine()" --> PC
+    Hazard -- "TakeDamage()" --> HP
 ```
 
 화살표가 `MusicLoopManager`로 들어오는 경로는 두 개뿐입니다. 패턴의 **"끝났다" 신호**와 삼각형 획득 후의 **"다음으로" 요청**입니다. 구간을 넘길지는 매니저만 결정하므로, 진행이 꼬였을 때 확인할 곳이 한 곳입니다.
@@ -233,6 +212,8 @@ void Start()   // 전환 씬이 열리면 저장된 값을 읽어 연출 선택
 
 ### 3.1 이동과 대시
 
+![대시](images/dash.gif)
+
 방향키 4개를 각각 검사해 더하므로 두 키를 함께 누르면 대각선으로 움직입니다. `Space`를 누르면 입력 방향으로 0.2초 동안 대시하고, 대시 동안은 무적입니다.
 
 | 설정값 (인스펙터) | 값 | 의미 |
@@ -244,7 +225,7 @@ void Start()   // 전환 씬이 열리면 저장된 값을 읽어 연출 선택
 
 #### 핵심 기능: 대시 한 번을 코루틴 하나로
 
-![대시](images/dash.gif)
+
 
 ```csharp
 // PlayerController.cs
@@ -278,7 +259,33 @@ public IEnumerator DashCoroutine(Vector2 direction)
 | 대시 중 다시 `Space` | `isDashing`이면 입력 무시 |
 | 넉백 중 · 구간 전환 연출 중 | `isKnockedBack` · `isTransitioning`이면 이동 · 대시 모두 무시 |
 
-### 3.2 피격과 무적
+### 3.2 이동 · 대시 잔상
+
+
+원작처럼 플레이어가 움직이면 뒤에 작아지며 사라지는 잔상이 남습니다. 이동 중에는 0.06초, 대시 중에는 0.02초 간격으로 더 촘촘하게 생성됩니다.
+
+```csharp
+// WaveTrailEffect.cs — 잔상 생성 판단
+float moveDistance = Vector3.Distance(transform.position, lastPosition);
+bool isMoving = moveDistance > 0.001f;           // (Why) 속도가 아닌 위치 변화로 판단 (8.2)
+
+if ((playerController != null && playerController.isDashing) || isMoving)
+{
+    if (timeLeft <= 0)
+    {
+        SpawnEchoPiece();
+        timeLeft = playerController.isDashing ? dashTimeBetweenSpawns : walkTimeBetweenSpawns;
+    }
+    else timeLeft -= Time.deltaTime;
+}
+lastPosition = transform.position;
+```
+
+생성된 잔상(`EchoPieceController`)은 0.3초 동안 크기를 5%까지 줄이며 투명해진 뒤 스스로 삭제됩니다. 잔상은 플레이어보다 정렬 순서를 1 낮춰 항상 플레이어 뒤에 그려지게 했습니다.
+
+### 3.3 피격과 무적
+
+![피격과무적](images/1)
 
 장애물에 맞으면 **넉백 · 깜빡임 · 체력 감소**가 동시에 일어나고, 1.5초 동안 무적이 됩니다. 체력이 줄어들 때마다 플레이어 사각형이 깨진 모양의 스프라이트로 바뀝니다.
 
@@ -313,29 +320,6 @@ public void TakeDamage()
 
 **[감수한 대가]** 나중에 클리어 삼각형이 생기면서, **무적 중에 삼각형 위를 지나가도 먹어지지 않는** 문제가 생겼습니다. 대시나 피격 직후에 삼각형에 닿으면 무적이 풀린 뒤 다시 닿아야 합니다. 판정 대상이 늘어날 것을 생각했다면 [B]가 맞았습니다(9.3).
 
-### 3.3 이동 · 대시 잔상
-
-
-원작처럼 플레이어가 움직이면 뒤에 작아지며 사라지는 잔상이 남습니다. 이동 중에는 0.06초, 대시 중에는 0.02초 간격으로 더 촘촘하게 생성됩니다.
-
-```csharp
-// WaveTrailEffect.cs — 잔상 생성 판단
-float moveDistance = Vector3.Distance(transform.position, lastPosition);
-bool isMoving = moveDistance > 0.001f;           // (Why) 속도가 아닌 위치 변화로 판단 (8.2)
-
-if ((playerController != null && playerController.isDashing) || isMoving)
-{
-    if (timeLeft <= 0)
-    {
-        SpawnEchoPiece();
-        timeLeft = playerController.isDashing ? dashTimeBetweenSpawns : walkTimeBetweenSpawns;
-    }
-    else timeLeft -= Time.deltaTime;
-}
-lastPosition = transform.position;
-```
-
-생성된 잔상(`EchoPieceController`)은 0.3초 동안 크기를 5%까지 줄이며 투명해진 뒤 스스로 삭제됩니다. 잔상은 플레이어보다 정렬 순서를 1 낮춰 항상 플레이어 뒤에 그려지게 했습니다.
 
 ---
 
@@ -349,13 +333,12 @@ lastPosition = transform.position;
 ![장애물 생명주기](images/obstacle.gif)
 
 ```mermaid
-%%{init: {'theme':'neutral'}}%%
-stateDiagram-v2
-    [*] --> Warning : Start() · 콜라이더 OFF
-    Warning --> Spawn : warningDuration (반투명 40%)
-    Spawn --> Active : flashInterval (흰색, 세로로 펼쳐짐)
-    Active --> Shrink : activeDuration (콜라이더 ON · isDeadly)
-    Shrink --> [*] : 축소 후 Destroy
+flowchart LR
+    Start(( )) -- "Start()" --> Warning
+Warning["<b>Warning</b><br/>콜라이더 OFF · 반투명 40%"] -- "warningDuration" --> Spawn
+Spawn["<b>Spawn</b><br/>흰색 플래시 · 세로 펼쳐짐"] -- "flashInterval" --> Active
+Active["<b>Active</b><br/>콜라이더 ON · isDeadly"] -- "activeDuration" --> Shrink
+Shrink["<b>Shrink</b><br/>축소 후 Destroy"] --> End((( )))
 ```
 
 #### 핵심 기능
@@ -596,6 +579,9 @@ sequenceDiagram
 
 ### 6.1 튜토리얼 9구간
 
+![튜토리얼](images/tutorial.gif)
+
+
 원작 튜토리얼처럼 **구간마다 새 요소를 하나씩 더하는** 순서로 구성했습니다.
 
 | 구간 | 새로 나오는 것 | 구성 | 클래스 |
@@ -610,7 +596,7 @@ sequenceDiagram
 | 8 | 겹침 | 7 + 상하 원 일렬 | `StagePhase8` |
 | 9 | 종합 | 원 일렬 → 랜덤 레이저 · 절반 기둥 · 세로 원 동시, 곡 끝까지 | `StagePhase9` |
 
-![튜토리얼](images/tutorial.gif)
+
 
 ### 6.2 보스전 시퀀스
 
@@ -737,7 +723,7 @@ flowchart LR
 
 ## 8. 문제 해결 기록
 
-### 8.1 대시 입력이 가끔 씹히는 문제
+### 8.1 대시 입력이 누락되는 문제
 
 - **(문제)** `Space`를 눌러도 대시가 나가지 않는 경우가 자주 있었습니다.
 - **(원인)** 이동 · 대시를 `FixedUpdate`에서 처리했는데, `wasPressedThisFrame`은 **키가 눌린 그 렌더 프레임에만** true입니다. `FixedUpdate`는 고정 주기(0.02초)로 불리므로, 렌더 프레임이 더 빠르면 키가 눌린 프레임에 `FixedUpdate`가 한 번도 호출되지 않아 입력이 사라졌습니다.
