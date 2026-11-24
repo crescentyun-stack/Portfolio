@@ -4,23 +4,395 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>포트폴리오</title>
-<link rel="icon" href="data:," /><!-- 아이콘 파일 없음: 브라우저가 /favicon.ico를 요청해 404가 나지 않게 -->
-<!-- 고정 렌더러 — 포트폴리오 페이지(아래로 읽는 한 페이지, A4 인쇄 = 제출 PDF). 내용은 data/portfolio.json · data/projects/*.json에서 읽습니다. 이 파일은 고치지 않아도 됩니다.
-     주소: #<절 id>(cover · intro · stack · p-<폴더> · p-<폴더>-core · glance · contact). 예전 포트폴리오 슬라이드 주소(#s=<장면 id> · #<번호>)는 같은 절로 넘어갑니다.
-     슬라이드는 project.html?p=<폴더>, 프로젝트 상세 문서는 doc.html?p=<폴더>. CDN은 버전 고정(Pretendard v1.3.9, Montserrat 5.2.8 — 영문 라벨, D2Coding 1.3.2) -->
+<link rel="icon" href="data:," />
+<!-- 첫 화면(게임 선반 + 게임기 + 설명서). data/portfolio.json · data/projects/*.json을 읽어 그립니다 — /portfolio-build로 다시 빌드하면 자동 반영.
+     문서형 포트폴리오 페이지(A4 인쇄 = 제출 PDF)는 portfolio.html로 옮겼습니다.
+     주의: /portfolio-update는 index.html을 템플릿 것으로 바꿉니다. 업데이트 뒤에는 새 index.html을 portfolio.html로 복사하고,
+     이 첫 화면은 git 이전 커밋에서 되살리세요(예: git checkout HEAD~1 -- index.html). -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.2.8/latin-700.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.2.8/latin-800.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/d2coding@1.3.2/d2coding-subset.css" />
-<link rel="stylesheet" href="assets/portfolio.css" />
-<link rel="stylesheet" href="theme/theme.css" /><!-- 테마(색·모양·영문 글꼴): /portfolio-theme가 씀. /portfolio-update가 건드리지 않음 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css" />
+<style>
+/* 레이아웃: 왼쪽 = 게임기 + 아래 선반, 오른쪽 = 펼친 설명서. 화면은 보는 곳, 설명서는 읽는 곳 */
+:root{
+  color-scheme:dark;
+  --room:#16131c; --room2:#221d2b; --wood:#6b4a33; --wood2:#4d3424;
+  --shell:#e7e2d6; --shell2:#cfc8b8; --shell3:#a9a191; --ink:#2a2530;
+  --scr:#0f1a17; --scrInk:#c8f2d8; --scrDim:#6f9c84; --scrHi:#ffe27a;
+  --paper:#f4efe4; --paper2:#e9e2d2; --pink:#2a2530; --pdim:#7a7166;
+  --ui:"Pretendard",system-ui,sans-serif; --px:"Galmuri11","Galmuri9",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(1200px 600px at 60% 30%,var(--room2),var(--room));color:#eee8f5;font:14px/1.5 var(--ui);overflow-x:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:3px solid var(--scrHi);outline-offset:3px}
+code{font-family:"GalmuriMono11",monospace;color:var(--scrHi)}
+
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px max(16px,2.4vw);gap:12px}
+.top b{font-family:var(--px);font-size:16px;letter-spacing:1px}
+.top a{font-size:13px;color:#cfc6dc;border:1px solid #ffffff30;padding:7px 12px;border-radius:6px;text-decoration:none}
+.top a:hover{border-color:var(--scrHi);color:var(--scrHi)}
+
+.room{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:start;gap:clamp(20px,2.4vw,48px);padding:0 max(16px,2.4vw) 24px;max-width:2600px;margin:0 auto}
+.left{display:flex;flex-direction:column;align-items:center;gap:18px;min-width:0}
+
+/* ── 선반 ── */
+.shelfwrap{display:flex;flex-direction:column;align-items:center;gap:34px;padding-bottom:18px}
+.shelfwrap .cap{font-family:var(--px);font-size:12px;color:#a99cbc;letter-spacing:2px}
+.shelf{display:flex;flex-wrap:wrap;justify-content:center;gap:56px 28px;padding:0 40px;align-items:flex-end;perspective:900px;position:relative}
+.shelf::after{content:"";position:absolute;left:0;right:0;bottom:-18px;height:18px;background:linear-gradient(var(--wood),var(--wood2));border-radius:2px;box-shadow:0 14px 24px #0008}
+.slotSpot{width:132px;height:168px;position:relative}
+.cart{width:132px;height:168px;position:relative;transform-style:preserve-3d;transform:rotateY(-18deg);transition:transform .35s cubic-bezier(.2,1.4,.4,1)}
+.cart:hover,.cart:focus-visible{transform:rotateY(0) translateY(-14px)}
+.cart.gone{visibility:hidden}
+.face{position:absolute;inset:0;border-radius:6px 6px 3px 3px}
+.front{background:var(--c);padding:8px 8px 10px;display:flex;flex-direction:column;gap:6px;box-shadow:inset 0 -6px 0 #0003,inset 0 2px 0 #ffffff40}
+.front .notch{height:8px;margin:0 18px;border-radius:0 0 4px 4px;background:#0003}
+.front .label{flex:1;border-radius:3px;background:#fff center/cover;box-shadow:inset 0 0 0 2px #0002}
+.front .name{font-family:var(--px);font-size:11px;color:#1a1520;text-align:center;line-height:1.2;background:#ffffffd0;border-radius:2px;padding:3px 2px}
+.side{width:22px;left:auto;right:-11px;transform:rotateY(90deg);background:color-mix(in srgb,var(--c) 70%,#000);border-radius:2px}
+.tagnum{position:absolute;top:-24px;left:0;right:0;text-align:center;font-family:var(--px);font-size:11px;color:#a99cbc}
+.clickme{position:absolute;left:50%;top:42%;transform:translateX(-50%);z-index:3;pointer-events:none;font-family:var(--px);font-size:12px;color:#1a1520;background:var(--scrHi);padding:4px 9px;border-radius:4px;white-space:nowrap;animation:bob 1s ease-in-out infinite}
+.clickme::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:var(--scrHi)}
+@keyframes bob{50%{transform:translate(-50%,-6px)}}
+.keys .row2{display:block;margin-top:3px}
+
+/* ── 게임기 ── */
+.consoleWrap{display:flex;justify-content:center;min-width:0;width:100%}
+.console{position:relative;width:min(100%,calc((100vh - 530px) * 1.6 + 316px));min-width:min(100%,560px);padding-top:44px}
+.slotTop{position:absolute;top:0;left:50%;transform:translateX(-50%);width:164px;height:60px;z-index:1}
+.slotTop .inserted{position:absolute;left:16px;bottom:-114px;width:132px;height:168px;display:none}
+.slotTop .inserted.on{display:block}
+.body{position:relative;z-index:2;background:linear-gradient(180deg,var(--shell),var(--shell2));border-radius:28px 28px 60px 60px;padding:20px clamp(14px,1.6vw,28px) 20px;display:grid;grid-template-columns:96px 1fr 96px;gap:clamp(10px,1.4vw,22px);align-items:center;box-shadow:inset 0 3px 0 #fff8,inset 0 -8px 0 #0002,0 30px 60px #000a}
+.body::before{content:"";position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:170px;height:12px;background:#2a2530;border-radius:4px}
+.brand{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;font-family:var(--px);color:var(--shell3);font-size:12px;letter-spacing:2px;margin-bottom:-6px}
+.led{display:flex;align-items:center;gap:6px}
+.led i{width:9px;height:9px;border-radius:50%;background:#5a1a1a;box-shadow:inset 0 1px 2px #0008}
+.led.on i{background:#ff4d4d;box-shadow:0 0 10px #ff4d4d}
+
+.bezel{background:#3b3542;border-radius:12px 12px 28px 12px;padding:10px 12px 14px;box-shadow:inset 0 2px 6px #0008;min-width:0}
+.screen{position:relative;background:var(--scr);aspect-ratio:16/10;border-radius:4px;overflow:hidden;color:var(--scrInk);font-family:var(--px);box-shadow:inset 0 0 40px #000c}
+.screen::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0 2px,#00000030 2px 3px);mix-blend-mode:multiply}
+.scr{position:absolute;inset:0;padding:clamp(10px,2vw,20px);display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.scr.off{background:#070b0a}
+.pg{display:flex;justify-content:space-between;font-size:11px;color:var(--scrDim);flex:none}
+.pg .dots{display:flex;gap:5px}
+.pg .dots i{width:7px;height:7px;background:#ffffff22}
+.pg .dots i.on{background:var(--scrHi)}
+h2.t{font-family:"Galmuri14",var(--px);font-size:clamp(18px,2.4vw,32px);color:#fff;line-height:1.2;font-weight:400}
+.sub{font-size:clamp(12px,1.2vw,15px);color:var(--scrInk);line-height:1.7}
+.dim{color:var(--scrDim)}
+.hi{color:var(--scrHi)}
+.cover{flex:1;min-height:0;border:2px solid #ffffff22;background:#000 center/cover}
+.cover.gif{background-size:contain;background-repeat:no-repeat}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:clamp(12px,1.15vw,15px);line-height:1.6}
+.kv dt{color:var(--scrDim)}.kv dd{color:var(--scrInk)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chips span{font-size:11px;border:1px solid var(--scrDim);padding:1px 6px;color:var(--scrInk)}
+.list{display:grid;gap:10px;font-size:clamp(12px,1.1vw,14px);line-height:1.65}
+.list b{color:var(--scrHi);font-weight:400;display:block}
+.menu{display:grid;gap:4px;font-size:14px}
+.menu .sel::before{content:"▶ ";color:var(--scrHi)}
+.menu span:not(.sel){padding-left:1.3em;color:var(--scrDim)}
+.blink{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
+.boot{position:absolute;inset:0;display:grid;place-items:center;background:var(--scr);z-index:3;text-align:center}
+.boot .logo{font-family:"Galmuri14",var(--px);font-size:clamp(20px,3.4vw,34px);color:#fff;animation:drop .7s cubic-bezier(.2,1.5,.4,1) both}
+.boot small{display:block;font-size:12px;color:var(--scrDim);margin-top:10px;animation:fade .4s .5s both}
+@keyframes drop{0%{transform:translateY(-120%);opacity:0}100%{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}}
+.flash{animation:flash .25s}@keyframes flash{0%{filter:brightness(3)}100%{filter:none}}
+
+/* 버튼 */
+.dpad{position:relative;width:104px;height:104px;justify-self:center;transform:scale(.9)}
+.dpad button{position:absolute;width:36px;height:36px;background:#2f2a35;color:#bdb3c9;font-size:12px;box-shadow:0 4px 0 #18151b}
+.dpad button:active{transform:translateY(3px);box-shadow:0 1px 0 #18151b}
+.dpad .u{left:34px;top:0;border-radius:6px 6px 0 0}.dpad .d{left:34px;bottom:0;border-radius:0 0 6px 6px}
+.dpad .l{left:0;top:34px;border-radius:6px 0 0 6px}.dpad .r{right:0;top:34px;border-radius:0 6px 6px 0}
+.dpad::after{content:"";position:absolute;left:34px;top:34px;width:36px;height:36px;background:#2f2a35}
+.ab{position:relative;width:110px;height:100px;justify-self:center;transform:scale(.9)}
+.ab button{position:absolute;width:46px;height:46px;border-radius:50%;background:#b8325a;color:#fff;font-family:var(--px);font-size:14px;box-shadow:0 5px 0 #6e1c36}
+.ab button:active{transform:translateY(3px);box-shadow:0 2px 0 #6e1c36}
+.ab .a{right:0;top:6px}.ab .b{left:0;top:44px}
+.ab small,.dpad small{position:absolute;font-family:var(--px);font-size:11px;color:#5b5348;white-space:nowrap}
+.ab .la{right:12px;top:56px}.ab .lb{left:12px;top:94px}
+.keys{grid-column:1/-1;text-align:center;font-family:var(--px);font-size:12px;color:#5b5348;margin-top:2px}
+.keys b{color:#b8325a;font-weight:400}
+
+.flyer{position:fixed;z-index:50;pointer-events:none;width:132px;height:168px}
+
+
+/* ── 설명서 ── */
+.manual{position:sticky;top:12px;height:calc(100vh - 86px);min-height:520px;display:flex;flex-direction:column;background:var(--paper);color:var(--pink);border-radius:4px 12px 12px 4px;box-shadow:0 24px 50px #0009,inset 10px 0 12px -8px #0003;overflow:hidden;--mc:#8b7fa3}
+.manual::before{content:"";position:absolute;left:14px;top:0;bottom:0;border-left:2px dashed #0000001f;pointer-events:none}
+.mhead{background:color-mix(in srgb,var(--mc) 72%,#1a1520);color:#fff;padding:16px 26px 14px 34px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex:none;transition:background .4s}
+.mhead small{display:block;font-family:var(--px);font-size:11px;letter-spacing:2px;opacity:.85}
+.mhead h2{font-family:"Galmuri14",var(--px);font-weight:400;font-size:clamp(22px,1.8vw,34px);line-height:1.2;margin-top:4px;text-shadow:2px 2px 0 #0003}
+.mhead .ed{font-family:var(--px);font-size:11px;opacity:.85;white-space:nowrap}
+.mtabs{display:flex;gap:4px;padding:10px 20px 0 30px;background:var(--paper2);flex:none;overflow-x:auto}
+.mtabs button{font-family:var(--px);font-size:clamp(12px,.75vw,14px);padding:7px 12px 6px;border-radius:6px 6px 0 0;color:var(--pdim);white-space:nowrap}
+.mtabs button:hover{color:var(--pink);background:#ffffff80}
+.mtabs button.on{background:var(--paper);color:var(--pink);box-shadow:inset 0 3px 0 var(--mc)}
+.mbody{flex:1;min-height:0;overflow:auto;padding:22px 30px 20px 38px;perspective:1200px}
+.mpage{font:clamp(15px,.9vw,18px)/1.8 var(--ui);transform-origin:left center}
+.mpage.turn{animation:turn .38s cubic-bezier(.3,.7,.3,1)}
+@keyframes turn{0%{transform:rotateY(-24deg);opacity:0}100%{transform:none;opacity:1}}
+.mpage h3{font-family:"Galmuri14",var(--px);font-weight:400;font-size:clamp(20px,1.2vw,24px);margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.mpage h3::before{content:"";width:12px;height:12px;background:var(--mc)}
+.mpage p.lead{font-size:1.07em;margin-bottom:14px}
+.mpage code{font-family:"D2Coding","GalmuriMono11",monospace;font-size:.9em;color:#8a2c4c;background:#0000000d;padding:0 4px;border-radius:3px}
+.spec{display:grid;grid-template-columns:auto 1fr;border-top:2px solid var(--pink);margin-bottom:14px}
+.spec dt,.spec dd{padding:7px 0;border-bottom:1px solid #0000001a;font-size:.95em}
+.spec dt{font-family:var(--px);font-size:12px;color:var(--pdim);padding-right:18px;padding-top:9px}
+.mchips{display:flex;flex-wrap:wrap;gap:6px}
+.mchips span{font-family:var(--px);font-size:11px;border:1.5px solid var(--pink);padding:2px 8px;border-radius:3px}
+.feat{display:grid;gap:16px}
+.feat>div{display:grid;grid-template-columns:34px 1fr;gap:4px 12px}
+.feat .n{grid-row:1/3;width:34px;height:34px;display:grid;place-items:center;background:var(--mc);color:#fff;font-family:"Galmuri14",var(--px);font-size:16px}
+.feat b{font-size:1.07em}
+.feat p{font-size:.97em;color:#3f3944}
+.bug{border:2px solid var(--pink);margin-bottom:14px}
+.bug>b{display:block;background:var(--pink);color:var(--paper);padding:6px 12px;font-size:.97em}
+.bug dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;padding:10px 12px;font-size:.94em}
+.bug dt{font-family:var(--px);font-size:12px;padding-top:2px}
+.bug dt.p{color:#b8325a}.bug dt.c{color:#a0700f}.bug dt.s{color:#1f7a52}
+.ok{list-style:none;display:grid;gap:8px;margin-bottom:18px}
+.ok li{padding-left:26px;position:relative;font-size:.97em}
+.ok li::before{content:"✓";position:absolute;left:0;top:0;width:18px;height:18px;display:grid;place-items:center;background:#1f7a52;color:#fff;font-size:11px;border-radius:2px;margin-top:4px}
+.mlinks{display:flex;flex-wrap:wrap;gap:8px}
+.mlinks a{font-family:var(--px);font-size:12px;color:var(--pink);text-decoration:none;border:2px solid var(--pink);padding:6px 12px;box-shadow:3px 3px 0 var(--pink)}
+.mlinks a:hover{background:var(--mc);color:#fff}
+.ctrl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;align-items:center;font-size:.94em;margin-top:6px}
+.ctrl kbd{font-family:var(--px);font-size:12px;border:2px solid var(--pink);border-radius:4px;padding:2px 8px;text-align:center;box-shadow:0 2px 0 var(--pink)}
+.sk{display:grid;gap:12px}
+.sk>div{border-bottom:1px solid #0000001a;padding-bottom:10px}
+.sk b{font-size:1.03em}.sk b small{font-family:var(--px);font-size:11px;color:var(--pdim);margin-left:6px}
+.sk li{list-style:none;font-size:.9em;color:#4a4450;padding-left:12px;position:relative}
+.sk li::before{content:"·";position:absolute;left:2px}
+.mfoot{flex:none;display:flex;justify-content:space-between;align-items:center;padding:10px 26px 12px 34px;border-top:1px solid #0000001a;font-family:var(--px);font-size:12px;color:var(--pdim)}
+.mfoot button{font-family:var(--px);font-size:12px;color:var(--pink);border:1.5px solid #00000030;padding:3px 10px;border-radius:3px}
+.mfoot button:hover{border-color:var(--pink)}
+
+/* 화면(보는 곳) */
+.full{position:absolute;inset:0;background:#000 center/cover}
+.full.gif{background-size:contain;background-repeat:no-repeat}
+.ovl{position:absolute;left:0;right:0;bottom:0;padding:24px 16px 12px;background:linear-gradient(transparent,#000d);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:4px 10px}
+.ovl b{font-family:"Galmuri14",var(--px);font-weight:400;font-size:clamp(16px,2vw,24px);color:#fff}
+.ovl span{font-size:11px;color:var(--scrHi);white-space:nowrap}
+.rec{position:absolute;top:10px;left:12px;font-size:11px;color:#fff;background:#0008;padding:2px 8px;display:flex;gap:6px;align-items:center}
+.rec i{width:8px;height:8px;border-radius:50%;background:#ff4d4d;animation:blink 1s steps(1) infinite}
+.idle{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:16px}
+.idle h2{font-family:"Galmuri14",var(--px);font-weight:400;font-size:clamp(24px,3.4vw,44px);color:#fff}
+.idle p{font-size:12px;color:var(--scrDim);margin-top:6px}
+.idle .ins{margin-top:18px;font-size:14px;color:var(--scrHi)}
+
+@media (max-width:1060px){
+  .room{grid-template-columns:1fr}
+  .manual{position:relative;top:0;height:auto;min-height:0}
+  .console{width:100%;min-width:0}
+  .mbody{overflow:visible}
+}
+@media (max-width:640px){
+  .body{grid-template-columns:1fr 1fr;border-radius:24px 24px 40px 40px}
+  .bezel{grid-column:1/-1;order:-1}
+  .brand{order:-2}
+  .keys .row2{display:none}
+  .shelf{gap:12px;padding:0 8px}
+  .slotSpot,.cart,.flyer,.slotTop .inserted{width:100px;height:127px}
+  .slotTop{width:132px}.slotTop .inserted{left:16px;bottom:-73px}
+  .shelf{gap:12px;padding:0 8px}
+  .mbody{padding:18px 18px 16px 30px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-<a class="skip-link" href="#main">본문으로 건너뛰기</a>
-<div id="app"><p class="loading">불러오는 중…</p></div>
-<noscript><div class="notice"><h1>JavaScript를 켜 주세요</h1><p>이 포트폴리오는 data/의 내용을 읽어 브라우저에서 그립니다. JavaScript를 켠 뒤 다시 열어 주세요.</p></div></noscript>
-<script src="assets/strings.js"></script><!-- UI 문구 표(기본 문구) + theme/strings.tsv(내 문구) 읽기. common.js보다 먼저 -->
-<script src="assets/common.js"></script>
-<script src="assets/portfolio.js"></script>
+<div class="top"><b id="brandName">GAME&nbsp;SHELF</b><a href="portfolio.html">문서형 포트폴리오로 보기 ▸</a></div>
+
+<main class="room">
+  <div class="left">
+    <section class="shelfwrap" aria-label="프로젝트 카트리지 선반">
+      <div class="cap">PROJECT SHELF — 카트리지를 클릭해서 꽂기</div>
+      <div class="shelf" id="shelf"></div>
+    </section>
+    <section class="consoleWrap">
+      <div class="console" id="console">
+        <div class="slotTop" id="slotTop"><div class="inserted" id="inserted"></div></div>
+        <div class="body">
+          <div class="brand"><span>SY-01 PORTFOLIO SYSTEM</span><span class="led" id="led"><i></i>POWER</span></div>
+          <div class="dpad" role="group" aria-label="방향키">
+            <button class="u" id="kU" aria-label="위">▲</button><button class="l" id="kL" aria-label="설명서 이전 쪽">◀</button>
+            <button class="r" id="kR" aria-label="설명서 다음 쪽">▶</button><button class="d" id="kD" aria-label="아래">▼</button>
+          </div>
+          <div class="bezel"><div class="screen" id="screen"><div class="scr" id="scr"></div></div></div>
+          <div class="ab">
+            <button class="a" id="kA" aria-label="A 버튼: 선택">A</button><button class="b" id="kB" aria-label="B 버튼: 꺼내기">B</button>
+            <small class="la">선택</small><small class="lb">꺼내기</small>
+          </div>
+          <div class="keys"><b>마우스</b> 카트리지 클릭 = 꽂기 · 설명서 탭 클릭 = 쪽 넘기기<span class="row2"><b>키보드</b> ← → 설명서 넘기기 · Enter = A · Esc = B · 1~3 카트리지 꽂기</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <article class="manual" id="manual" aria-live="polite">
+    <header class="mhead"><div><small id="mKick"></small><h2 id="mTitle"></h2></div><span class="ed" id="mEd"></span></header>
+    <nav class="mtabs" id="mTabs" aria-label="설명서 쪽"></nav>
+    <div class="mbody" id="mBody"></div>
+    <footer class="mfoot"><button id="mPrev">◀ 이전 쪽</button><span id="mPage"></span><button id="mNext">다음 쪽 ▶</button></footer>
+  </article>
+</main>
+
+<script>
+// ── 데이터 읽기: data/portfolio.json + data/projects/<폴더>.json (/portfolio-build가 만든 것 그대로) ──
+const COLORS=['#46d39a','#9b7bff','#ff5c9a','#ffb347','#4cc3ff','#ff7a59','#c3e64a','#e889ff'];
+const escH=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=t=>escH(t).replace(/`([^`]+)`/g,'<code>$1</code>');
+const encPath=p=>String(p).replace(/^\.\//,'').split('/').map(encodeURIComponent).join('/');
+const srcPath=(id,rel)=>`src/${encodeURIComponent(id)}/${encPath(rel)}`;
+const safeUrl=u=>/^https?:\/\//.test(u||'')?escH(u):'';
+async function getJSON(u){const r=await fetch(u,{cache:'no-cache'});if(!r.ok)throw new Error(u+' '+r.status);return r.json()}
+async function loadData(){
+  const pf=await getJSON('data/portfolio.json');
+  const list=await Promise.all(pf.projects.map(id=>getJSON(`data/projects/${encodeURIComponent(id)}.json`)));
+  const pr=pf.profile||{};
+  return {
+    profile:{name:escH(pr.name),nameEn:escH(pr.nameEn||pr.name),headline:escH(pr.headline),intro:escH(pr.intro),email:escH(pr.email),github:safeUrl(pr.github)},
+    skills:(pf.skills||[]).map(k=>({name:escH(k.name),ev:(k.evidence||[]).map(e=>({text:fmt(e.text),project:e.project}))})),
+    projects:list.map((d,i)=>{
+      const meta={};(d.meta||[]).forEach(m=>meta[m.label]=m.value);
+      const shots=d.screenshots||[];const gif=shots.find(x=>/\.gif$/i.test(x.src))||shots[0];
+      const en=String(d.id).replace(/^\d+[-_. ]*/,'').replace(/[-_ ]+/g,'')||d.id;
+      return {id:d.id,key:'p'+i,en:escH(en),color:COLORS[i%COLORS.length],title:escH(d.title),tagline:escH(d.tagline),
+        genre:escH(meta['장르']||''),period:escH(meta['기간']||''),team:escH(meta['인원']||d.team?.size||''),
+        role:escH(d.team?.role||''),teamType:d.team?.type==='team'?'team':'solo',tags:(d.tags||[]).map(escH),
+        highlights:(d.highlights||[]).map(h=>({title:escH(h.title),what:fmt(h.what)})),
+        troubles:(d.troubleshooting||[]).map(t=>({title:escH(t.title),problem:fmt(t.problem),cause:fmt(t.cause),solution:fmt(t.solution)})),
+        achieved:(d.retro?.achieved||[]).slice(0,4).map(fmt),
+        github:safeUrl(d.links?.github),video:safeUrl(d.links?.video),
+        img:d.cover?srcPath(d.id,d.cover):(gif?srcPath(d.id,gif.src):''),
+        gif:gif?srcPath(d.id,gif.src):(d.cover?srcPath(d.id,d.cover):'')};
+    })};
+}
+let DATA;
+loadData().then(d=>{DATA=d;main()}).catch(err=>{
+  console.error(err);
+  document.getElementById('scr').innerHTML=`<div class="idle"><div><h2 style="font-size:20px">LOAD ERROR</h2><p>data/를 읽지 못했습니다. 파일을 직접 열었다면 로컬 서버(python -m http.server)로 열어 주세요.</p><p style="margin-top:10px"><a href="portfolio.html" style="color:#ffe27a">문서형 포트폴리오 보기 ▸</a></p></div></div>`;
+});
+function main(){
+const $=s=>document.querySelector(s);
+const P=DATA.projects, prof=DATA.profile;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let loaded=null, page=0, busy=false;
+
+// 카트리지
+function cartHTML(p){return `<div class="face front"><div class="notch"></div><div class="label" style="background-image:url(${p.img})"></div><div class="name">${p.title}</div></div><div class="face side"></div>`}
+$('#shelf').innerHTML=P.map((p,i)=>`<div class="slotSpot">${i===0?'<span class="clickme">CLICK!</span>':''}<span class="tagnum">${String(i+1).padStart(2,'0')} · ${p.teamType==='team'?'TEAM':'SOLO'}</span>
+  <button class="cart" id="cart-${p.key}" style="--c:${p.color}" aria-label="${p.title} 카트리지 꽂기">${cartHTML(p)}</button></div>`).join('');
+P.forEach((p,i)=>$('#cart-'+p.key).onclick=()=>insert(i));
+
+// 설명서 쪽 구성
+const SYS_PAGES=[
+  ['시작하기',()=>`<h3>개발자 소개</h3><p class="lead"><b>${prof.name}</b> · ${prof.nameEn}<br>${prof.headline}</p>
+    <p>${prof.intro.replace(/\n/g,'<br>')}</p>
+    <h3 style="margin-top:24px">조작 방법</h3>
+    <div class="ctrl"><kbd>클릭</kbd><span>선반의 카트리지를 누르면 게임기에 꽂힙니다</span>
+    <kbd>◀ ▶</kbd><span>설명서 쪽 넘기기 (위의 탭을 눌러도 됩니다)</span>
+    <kbd>A</kbd><span>다음 쪽 · 카트리지가 없으면 첫 번째 게임 꽂기</span>
+    <kbd>B</kbd><span>카트리지 꺼내기</span></div>`],
+  ['보유 스킬',()=>`<h3>보유 스킬</h3><div class="sk">${DATA.skills.map(k=>`<div><b>${k.name}<small>×${new Set(k.ev.map(e=>e.project)).size} 프로젝트</small></b><ul>${k.ev.map(e=>`<li>${e.text}</li>`).join('')}</ul></div>`).join('')}</div>`],
+  ['연락처',()=>`<h3>연락처</h3><dl class="spec"><dt>EMAIL</dt><dd>${prof.email}</dd>${prof.github?`<dt>GITHUB</dt><dd>${prof.github.replace('https://','')}</dd>`:''}</dl>
+    <div class="mlinks">${prof.github?`<a href="${prof.github}" target="_blank" rel="noopener">GitHub 열기 ↗</a>`:''}<a href="portfolio.html">문서형 포트폴리오 ↗</a></div>
+    <h3 style="margin-top:24px">수록 게임</h3><div class="feat">${P.map((p,i)=>`<div><span class="n" style="background:${p.color}">${i+1}</span><b>${p.title}</b><p>${p.tagline}</p></div>`).join('')}</div>`],
+];
+function projPages(p){return [
+  ['게임 소개',()=>`<h3>게임 소개</h3><p class="lead">${p.tagline}</p>
+    <dl class="spec"><dt>장르</dt><dd>${p.genre}</dd><dt>기간</dt><dd>${p.period}</dd><dt>인원</dt><dd>${p.team}</dd><dt>내 역할</dt><dd>${p.role}</dd></dl>
+    <div class="mchips">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>`],
+  ['주요 기능',()=>`<h3>주요 기능</h3><div class="feat">${p.highlights.map((h,i)=>`<div><span class="n">${i+1}</span><b>${h.title}</b><p>${h.what}</p></div>`).join('')}</div>`],
+  ['버그 수정 기록',()=>`<h3>버그 수정 기록</h3>${p.troubles.map((t,i)=>`<div class="bug"><b>#${i+1} ${t.title}</b><dl><dt class="p">증상</dt><dd>${t.problem}</dd><dt class="c">원인</dt><dd>${t.cause}</dd><dt class="s">해결</dt><dd>${t.solution}</dd></dl></div>`).join('')}`],
+  ['클리어 기록',()=>`<h3>클리어 기록</h3><ul class="ok">${p.achieved.map(a=>`<li>${a}</li>`).join('')}</ul>
+    <h3>더 보기</h3><div class="mlinks"><a href="project.html?p=${encodeURIComponent(p.id)}">슬라이드 ↗</a><a href="doc.html?p=${encodeURIComponent(p.id)}">상세 프로젝트 문서 ↗</a>${p.github?`<a href="${p.github}" target="_blank" rel="noopener">GitHub ↗</a>`:''}${p.video?`<a href="${p.video}" target="_blank" rel="noopener">플레이 영상 ↗</a>`:''}</div>`],
+]}
+const pages=()=>loaded===null?SYS_PAGES:projPages(P[loaded]);
+
+function renderManual(anim){
+  const pg=pages(), p=loaded===null?null:P[loaded];
+  const m=$('#manual'); m.style.setProperty('--mc',p?p.color:'#8b7fa3');
+  $('#mKick').textContent=p?`SY-01 전용 게임 설명서 · ${p.teamType==='team'?'TEAM':'SOLO'} PROJECT`:'SY-01 PORTFOLIO SYSTEM · 본체 사용 설명서';
+  $('#mTitle').textContent=p?p.title:`${prof.name}의 포트폴리오`;
+  $('#mEd').textContent=p?p.period.split('(')[0].trim():'UNITY CLIENT DEV';
+  $('#mTabs').innerHTML=pg.map((x,i)=>`<button class="${i===page?'on':''}" data-i="${i}">${String(i+1).padStart(2,'0')} ${x[0]}</button>`).join('');
+  document.querySelectorAll('#mTabs button').forEach(b=>b.onclick=()=>go(+b.dataset.i));
+  $('#mBody').innerHTML=`<div class="mpage ${anim?'turn':''}">${pg[page][1]()}</div>`; $('#mBody').scrollTop=0;
+  $('#mPage').textContent=`p.${page+1} / ${pg.length}`;
+}
+function renderScreen(){
+  const s=$('#scr');
+  if(loaded===null){
+    s.innerHTML=`<div class="idle"><div><p>UNITY CLIENT DEVELOPER</p><h2>${prof.nameEn.toUpperCase()}</h2><div class="ins blink">INSERT CARTRIDGE</div><p>선반에서 카트리지를 골라 꽂아 주세요</p></div></div>`;
+  }else{
+    const p=P[loaded], cover=page===0;
+    s.innerHTML=`<div class="full ${cover?'':'gif'}" style="background-image:url(${cover?p.img:p.gif})"></div>
+      ${cover?'':'<div class="rec"><i></i>PLAY</div>'}
+      <div class="ovl"><b>${p.title}</b><span>설명서 ${String(page+1).padStart(2,'0')} · ${pages()[page][0]} ▶</span></div>`;
+  }
+  s.classList.remove('off');
+}
+function go(i){if(busy)return;const n=pages().length;page=(i+n)%n;renderManual(true);renderScreen();
+  $('#screen').classList.remove('flash');void $('#screen').offsetWidth;$('#screen').classList.add('flash')}
+function turn(d){go(page+d)}
+
+// 꽂기
+function insert(i){
+  document.querySelector('.clickme')?.remove();
+  if(busy||loaded===i)return;
+  if(loaded!==null){eject(()=>insert(i));return}
+  busy=true;
+  const p=P[i], src=$('#cart-'+p.key), r=src.getBoundingClientRect();
+  const slot=$('#inserted'); slot.innerHTML=`<div class="cart" style="--c:${p.color};transform:none">${cartHTML(p)}</div>`;
+  slot.classList.add('on'); const tr=slot.getBoundingClientRect(); slot.classList.remove('on');
+  const fly=document.createElement('div'); fly.className='flyer'; fly.innerHTML=`<div class="cart" style="--c:${p.color};transform:none">${cartHTML(p)}</div>`;
+  Object.assign(fly.style,{left:r.left+'px',top:r.top+'px'}); document.body.appendChild(fly); src.classList.add('gone');
+  const dx=tr.left-r.left, dy=tr.top-r.top-130;
+  const done=()=>{fly.remove();slot.classList.add('on');
+    slot.animate([{transform:'translateY(-130px)'},{transform:'translateY(0)'}],{duration:reduce?1:320,easing:'cubic-bezier(.5,0,.8,.4)'}).onfinish=()=>boot(i)};
+  if(reduce){done();return}
+  fly.animate([{transform:'translate(0,0) rotate(0)'},{transform:`translate(${dx*0.5}px,${dy-80}px) rotate(8deg)`,offset:.55},{transform:`translate(${dx}px,${dy}px) rotate(0)`}],{duration:620,easing:'cubic-bezier(.3,.7,.3,1)'}).onfinish=()=>{fly.style.transform=`translate(${dx}px,${dy}px)`;done()};
+}
+function boot(i){
+  $('#led').classList.add('on'); loaded=i; page=0;
+  const s=$('#scr'); s.innerHTML=''; s.classList.add('off');
+  const b=document.createElement('div'); b.className='boot'; b.innerHTML=`<div><div class="logo">${P[i].en.toUpperCase()}</div><small>SY-01 · ${P[i].teamType==='team'?'TEAM':'SOLO'} PROJECT</small></div>`;
+  $('#screen').appendChild(b);
+  renderManual(true);
+  setTimeout(()=>{b.remove();renderScreen();busy=false},reduce?50:1000);
+}
+function eject(after){
+  if(loaded===null||busy)return; busy=true;
+  const p=P[loaded], slot=$('#inserted');
+  slot.animate([{transform:'translateY(0)'},{transform:'translateY(-130px)'}],{duration:reduce?1:260,easing:'ease-out'}).onfinish=()=>{
+    slot.classList.remove('on');$('#cart-'+p.key).classList.remove('gone');$('#led').classList.remove('on');
+    loaded=null;page=0;renderManual(true);renderScreen();busy=false;after&&after()};
+}
+
+// 버튼
+$('#kL').onclick=()=>turn(-1); $('#kR').onclick=()=>turn(1);
+$('#mPrev').onclick=()=>turn(-1); $('#mNext').onclick=()=>turn(1);
+$('#kU').onclick=()=>$('#mBody').scrollBy({top:-160,behavior:'smooth'});
+$('#kD').onclick=()=>$('#mBody').scrollBy({top:160,behavior:'smooth'});
+$('#kA').onclick=()=>{if(loaded===null)insert(0);else turn(1)};
+$('#kB').onclick=()=>eject();
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft')turn(-1);
+  else if(e.key==='ArrowRight')turn(1);
+  else if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();eject()}
+  else if(/^[1-9]$/.test(e.key)&&+e.key<=P.length)insert(+e.key-1);
+  else if(e.key==='Enter'&&!e.target.closest('button,a'))$('#kA').click();
+});
+document.title=`${prof.name} · 포트폴리오`;
+$('#brandName').textContent=`${prof.nameEn.toUpperCase()} · GAME SHELF`;
+renderManual(false); renderScreen();
+}
+</script>
 </body>
 </html>

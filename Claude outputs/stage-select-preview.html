@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>스테이지 선택 미리보기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css" />
+<style>
+  :root{
+    --bg:#0d1020; --bg2:#151a33; --ink:#e9ecff; --dim:#8a90b8;
+    --accent:#2F6FEB; --accent2:#8b5cf6; --gold:#ffd25a; --ok:#46d39a;
+    --card:#1b2142; --line:#2b3366;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:Galmuri11,monospace;
+       overflow:hidden;-webkit-font-smoothing:none;image-rendering:pixelated}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+  /* 별 배경 */
+  .stars{position:fixed;inset:0;pointer-events:none;
+    background:
+      radial-gradient(2px 2px at 12% 18%,#fff8 50%,transparent 51%),
+      radial-gradient(2px 2px at 78% 12%,#fff6 50%,transparent 51%),
+      radial-gradient(2px 2px at 40% 70%,#fff5 50%,transparent 51%),
+      radial-gradient(2px 2px at 88% 64%,#fff7 50%,transparent 51%),
+      radial-gradient(2px 2px at 22% 86%,#fff4 50%,transparent 51%),
+      radial-gradient(2px 2px at 60% 30%,#fff6 50%,transparent 51%),
+      linear-gradient(180deg,#0b0e1c 0%,#151a3a 100%);}
+
+  /* ── 타이틀 화면 ── */
+  #title{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;
+         justify-content:center;gap:28px;z-index:20;transition:opacity .5s}
+  #title.hide{opacity:0;pointer-events:none}
+  .logo{text-align:center;line-height:1.1}
+  .logo small{display:block;font-family:Galmuri11;color:var(--dim);letter-spacing:6px;font-size:18px;margin-bottom:14px}
+  .logo h1{font-family:Galmuri14;font-size:clamp(44px,10vw,110px);letter-spacing:2px;
+           color:#fff;text-shadow:6px 6px 0 var(--accent),12px 12px 0 var(--accent2)}
+  .logo p{margin-top:28px;font-size:20px;color:var(--ink);opacity:.85}
+  .start{font-family:Galmuri14;font-size:34px;letter-spacing:4px;padding:8px 16px;
+         animation:blink 1s steps(1) infinite}
+  .start::before{content:"▶ "}
+  @keyframes blink{50%{opacity:.25}}
+  .hint{font-family:Galmuri11;font-size:15px;color:var(--dim)}
+
+  /* ── 월드맵 ── */
+  #world{position:fixed;inset:0;display:flex;flex-direction:column;opacity:0;transition:opacity .5s}
+  #world.show{opacity:1}
+  header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;
+         font-family:Galmuri11;font-size:15px;color:var(--dim);gap:12px}
+  header b{color:var(--ink);font-family:Galmuri14;font-size:20px}
+  .skip{border:3px solid var(--dim);padding:8px 14px;color:var(--ink);font-size:15px;white-space:nowrap}
+  .skip:hover{border-color:var(--gold);color:var(--gold)}
+  .mapwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 8px}
+  svg#map{width:100%;height:100%}
+  .node{cursor:pointer}
+  .node text{font-family:Galmuri11;font-size:12px;fill:#b8bde0;text-anchor:middle;paint-order:stroke;stroke:#0b0e1c;stroke-width:4px;stroke-linejoin:round}
+  .node.cur text{fill:var(--gold)}
+  .node .ring{fill:none;stroke:var(--gold);stroke-width:3;opacity:0}
+  .node.cur .ring{opacity:1;animation:pulse 1s steps(2) infinite}
+  @keyframes pulse{50%{stroke-width:6}}
+
+  /* 정보 카드 */
+  #card{margin:0 auto 14px;width:min(1000px,calc(100% - 32px));background:var(--card);
+        border:4px solid var(--line);box-shadow:8px 8px 0 #0006;padding:18px 26px;min-height:170px}
+  #card .kicker{font-family:Galmuri11;font-size:14px;color:var(--accent2);letter-spacing:2px}
+  #card h2{font-family:Galmuri14;font-size:30px;margin:6px 0 8px}
+  #card .desc{font-size:17px;line-height:1.6;color:#cfd3f5}
+  #card .meta{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+  #card .meta span{font-family:Galmuri11;font-size:14px;border:2px solid var(--line);padding:2px 6px;color:var(--dim)}
+  #card .go{margin-top:12px;font-family:Galmuri11;font-size:15px;color:var(--gold)}
+  .keys{text-align:center;font-family:Galmuri11;font-size:14px;color:var(--dim);padding-bottom:12px}
+  .keys kbd{border:2px solid var(--dim);padding:0 5px;margin:0 2px;font-family:inherit}
+
+  /* 입장 연출 */
+  #enter{position:fixed;inset:0;background:#000;z-index:30;display:flex;align-items:center;
+         justify-content:center;flex-direction:column;gap:14px;opacity:0;pointer-events:none;transition:opacity .35s}
+  #enter.on{opacity:1;pointer-events:auto}
+  #enter h3{font-family:Galmuri14;font-size:44px;letter-spacing:3px}
+  #enter p{font-size:17px;color:var(--dim);text-align:center;line-height:1.7;padding:0 20px}
+  #enter code{font-family:GalmuriMono11;color:var(--ok)}
+  #enter button{margin-top:10px;border:3px solid var(--ink);padding:10px 18px;font-size:17px}
+
+  @media (max-width:600px){
+    .keys{display:none}
+    #card h2{font-size:17px}
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<!-- 타이틀 -->
+<section id="title">
+  <div class="logo">
+    <small>UNITY CLIENT DEVELOPER</small>
+    <h1>SEUNGMIN YUN</h1>
+    <p>디자인과 연출감각을 코드로 구현하는 유니티 클라이언트 개발자</p>
+  </div>
+  <button class="start" id="startBtn">PRESS START</button>
+  <div class="hint">Enter 또는 클릭</div>
+</section>
+
+<!-- 월드맵 -->
+<section id="world" aria-hidden="true">
+  <header>
+    <div><b>WORLD 1</b> &nbsp;포트폴리오</div>
+    <div id="progress">STAGE 0 / 3</div>
+    <button class="skip" id="skipBtn">SKIP ▶ 포트폴리오 바로 보기</button>
+  </header>
+  <div class="mapwrap">
+    <svg id="map" viewBox="30 50 940 335" preserveAspectRatio="xMidYMid meet" role="img" aria-label="스테이지 선택 지도">
+      <defs>
+        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M20 0H0V20" fill="none" stroke="#ffffff08" stroke-width="2"/>
+        </pattern>
+      </defs>
+      <rect width="1000" height="420" fill="url(#grid)"/>
+      <!-- 섬 모양 땅 -->
+      <path d="M40 300 L40 220 L120 160 L240 150 L300 90 L460 80 L540 140 L640 120 L720 60 L860 70 L960 150 L960 290 L880 360 L700 370 L600 330 L440 360 L300 350 L160 370 Z"
+            fill="#1a2250" stroke="#2b3366" stroke-width="4"/>
+      <g id="deco"></g>
+      <g id="path"></g>
+      <g id="nodes"></g>
+      <g id="hero"></g>
+    </svg>
+  </div>
+  <div id="card" aria-live="polite"></div>
+  <div class="keys"><kbd>←</kbd><kbd>→</kbd> 이동 &nbsp; <kbd>Enter</kbd> 입장 &nbsp; · &nbsp; 노드를 클릭해도 걸어갑니다</div>
+</section>
+
+<!-- 입장 연출 -->
+<div id="enter">
+  <h3 id="enterTitle">STAGE START</h3>
+  <p id="enterMsg"></p>
+  <button id="backBtn">◀ 맵으로 돌아가기</button>
+</div>
+
+<script>
+// ── 데이터: 실제 사이트에서는 data/portfolio.json · data/projects/*.json에서 읽어 자동으로 만듭니다
+const STAGES = [
+  { id:'start',  label:'START',   x:90,  y:250, kind:'home',
+    kicker:'WORLD 1', title:'윤승민 · SeungMin Yun',
+    desc:'화면이 어떻게 보이고 움직여야 하는지 아는 유니티 개발자입니다. 오른쪽으로 걸어가 스테이지를 골라 보세요.',
+    meta:[], link:'index.html#cover' },
+  { id:'intro',  label:'ABOUT',   x:220, y:200, kind:'house',
+    kicker:'ABOUT', title:'소개',
+    desc:'3D 그래픽을 공부하며 기른 감각으로 UI·VFX·애니메이션을 만들고, 연출이 게임 로직과 깔끔하게 연결되도록 구조까지 설계합니다.',
+    meta:[], link:'index.html#intro' },
+  { id:'stack',  label:'SKILLS',  x:360, y:130, kind:'shop',
+    kicker:'ITEM SHOP', title:'기술 스택',
+    desc:'프로젝트에서 실제로 쓴 기술만 모았습니다.',
+    meta:['Unity','C#','UniTask','코루틴','DOTween','Animator','레벨 디자인','Git 협업'], link:'index.html#stack' },
+  { id:'p1', label:'STAGE 1', x:520, y:200, kind:'stage', color:'#46d39a', num:1,
+    kicker:'STAGE 1 · 1인 · 5일', title:'골프 타운',
+    desc:'마을 로비를 공으로 굴러다니며 스테이지 입구를 찾아 들어가고, 스테이지마다 다른 기믹을 넘어 홀인하는 3D 미니골프 게임',
+    meta:['Unity 6','URP','Animator','DOTween','ProBuilder'], link:'project.html?p=0-GolfTown' },
+  { id:'p2', label:'STAGE 2', x:680, y:110, kind:'stage', color:'#8b5cf6', num:2, lbl:{x:0,y:-28,a:'middle'},
+    kicker:'STAGE 2 · 3인 팀 · 약 3주', title:'이그드라실',
+    desc:"부루마블식 자산 경쟁과 1:1 실시간 대전 '야차'를 결합한 2~4인 온라인 보드게임",
+    meta:['Unity 6','uGUI','UniTask','DOTween','Odin Inspector'], link:'project.html?p=00-Yggdrasil' },
+  { id:'p3', label:'STAGE 3', x:820, y:200, kind:'stage', color:'#ff6fa8', num:3, lbl:{x:-24,y:5,a:'end'},
+    kicker:'STAGE 3 · 1인 · 16일', title:'Just Shapes & Beats 모작',
+    desc:'음악에 맞춰 쏟아지는 도형 탄막을 피하는 리듬 회피 게임의 튜토리얼·보스 스테이지를 Unity 2D로 다시 만든 모작',
+    meta:['Unity 6','URP 2D','코루틴','상속','TextMeshPro'], link:'project.html?p=1-Just-Shapes-And-Beats' },
+  { id:'contact', label:'CONTACT', x:900, y:310, kind:'castle', lbl:{x:-26,y:5,a:'end'},
+    kicker:'GOAL', title:'연락하기',
+    desc:'crescentyun@gmail.com · github.com/crescentyun-stack',
+    meta:[], link:'index.html#contact' },
+];
+
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e};
+
+// ── 길
+const pathG=document.getElementById('path');
+const d=STAGES.map((s,i)=>(i?'L':'M')+s.x+' '+s.y).join(' ');
+el('path',{d,fill:'none',stroke:'#0b0e1c',  'stroke-width':30,'stroke-linejoin':'round','stroke-linecap':'round'},pathG);
+el('path',{d,fill:'none',stroke:'#c9b27a',  'stroke-width':18,'stroke-linejoin':'round','stroke-linecap':'round'},pathG);
+el('path',{d,fill:'none',stroke:'#e8d39c',  'stroke-width':6,'stroke-dasharray':'3 18','stroke-linecap':'square'},pathG);
+
+// ── 장식(나무)
+const deco=document.getElementById('deco');
+[[150,300],[300,280],[420,250],[600,290],[760,280],[480,110],[880,130],[120,200],[640,170]].forEach(([x,y])=>{
+  el('rect',{x:x-3,y:y,width:6,height:10,fill:'#5a3d2b'},deco);
+  el('rect',{x:x-10,y:y-14,width:20,height:16,fill:'#2f7a5a'},deco);
+  el('rect',{x:x-6,y:y-20,width:12,height:6,fill:'#3c9a70'},deco);
+});
+
+// ── 노드
+const nodesG=document.getElementById('nodes');
+const nodeEls=STAGES.map((s,i)=>{
+  const g=el('g',{class:'node',transform:`translate(${s.x} ${s.y}) scale(1.5)`,tabindex:0,role:'button','aria-label':s.title},nodesG);
+  el('rect',{class:'ring',x:-24,y:-24,width:48,height:48},g);
+  if(s.kind==='stage'){
+    el('rect',{x:-18,y:-18,width:36,height:36,fill:'#0b0e1c'},g);
+    el('rect',{x:-15,y:-15,width:30,height:30,fill:s.color},g);
+    const t=el('text',{y:6,style:'font-family:Galmuri14;font-size:16px;fill:#0b0e1c;stroke:none'},g);t.textContent=s.num;
+  }else if(s.kind==='castle'){
+    el('rect',{x:-18,y:-14,width:36,height:30,fill:'#0b0e1c'},g);
+    el('rect',{x:-15,y:-11,width:30,height:24,fill:'#ffd25a'},g);
+    [-15,-5,5].forEach(x=>el('rect',{x,y:-19,width:8,height:8,fill:'#ffd25a'},g));
+    el('rect',{x:-4,y:3,width:8,height:10,fill:'#0b0e1c'},g);
+  }else if(s.kind==='shop'){
+    el('rect',{x:-16,y:-10,width:32,height:24,fill:'#0b0e1c'},g);
+    el('rect',{x:-13,y:-7,width:26,height:18,fill:'#e9ecff'},g);
+    el('rect',{x:-18,y:-18,width:36,height:10,fill:'#2F6FEB'},g);
+    el('rect',{x:-4,y:1,width:8,height:10,fill:'#2b3366'},g);
+  }else if(s.kind==='house'){
+    el('rect',{x:-14,y:-6,width:28,height:20,fill:'#e9ecff'},g);
+    el('path',{d:'M-18 -6 L0 -20 L18 -6 Z',fill:'#ff6fa8'},g);
+    el('rect',{x:-4,y:2,width:8,height:12,fill:'#2b3366'},g);
+  }else{
+    el('rect',{x:-12,y:-12,width:24,height:24,fill:'#0b0e1c'},g);
+    el('rect',{x:-9,y:-9,width:18,height:18,fill:'#e9ecff'},g);
+  }
+  const L=s.lbl||{x:0,y:38,a:'middle'};const lbl=el('text',{x:L.x,y:L.y,style:`text-anchor:${L.a}`},g);lbl.textContent=s.label;
+  g.addEventListener('click',()=>walkTo(i));
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'){e.stopPropagation();cur===i?enter():walkTo(i)}});
+  return g;
+});
+
+// ── 캐릭터 (도트 2프레임)
+const heroG=document.getElementById('hero');
+const PAL={h:'#2b2240',s:'#ffd9b8',e:'#0b0e1c',c:'#2F6FEB',d:'#1d4bb0',p:'#3a3f6a',w:'#ffffff'};
+const FRAMES=[
+ ['....hhhh....','...hhhhhh...','..hhhhhhhh..','..hssssssh..','..hsesseshh.','..hssssssh..','...ssssss...','..cccccccc..','.scccwwccccs.','.s.cccccc.s.','...dddddd...','...pp..pp...','...pp..pp...','..ee....ee..'],
+ ['....hhhh....','...hhhhhh...','..hhhhhhhh..','..hssssssh..','..hsesseshh.','..hssssssh..','...ssssss...','..cccccccc..','.scccwwccccs.','.s.cccccc.s.','...dddddd...','...pp.pp....','..pp...pp...','.ee.....ee..'],
+];
+const PX=5;
+const frameGs=FRAMES.map((rows,fi)=>{
+  const g=el('g',{style:fi?'display:none':''},heroG);
+  el('ellipse',{cx:0,cy:2,rx:26,ry:6,fill:'#0006'},g);
+  rows.forEach((r,y)=>[...r].forEach((ch,x)=>{
+    if(PAL[ch]) el('rect',{x:(x-6)*PX,y:(y-14)*PX,width:PX,height:PX,fill:PAL[ch]},g);
+  }));
+  return g;
+});
+let facing=1;
+function placeHero(x,y,bob=0){
+  heroG.setAttribute('transform',`translate(${x} ${y-14+bob}) scale(${facing} 1)`);
+}
+
+// ── 이동
+let cur=0, pos={x:STAGES[0].x,y:STAGES[0].y}, moving=false, queue=[];
+const SPEED=320; // px/s
+function walkTo(target){
+  if(target<0||target>=STAGES.length)return;
+  if(moving){queue=[target];return}
+  if(target===cur){return}
+  const step=target>cur?1:-1;
+  const route=[];for(let i=cur+step;step>0?i<=target:i>=target;i+=step)route.push(i);
+  moving=true;runRoute(route);
+}
+function runRoute(route){
+  if(!route.length){moving=false;if(queue.length){const t=queue.pop();walkTo(t)}return}
+  const nxt=route.shift(), a={...pos}, b={x:STAGES[nxt].x,y:STAGES[nxt].y};
+  facing=b.x>=a.x?1:-1;
+  const dist=Math.hypot(b.x-a.x,b.y-a.y), dur=dist/SPEED*1000; let t0=null;
+  function tick(ts){
+    if(t0===null)t0=ts;
+    const k=Math.min(1,(ts-t0)/dur);
+    pos={x:a.x+(b.x-a.x)*k,y:a.y+(b.y-a.y)*k};
+    const f=Math.floor(ts/140)%2;
+    frameGs[0].style.display=f?'none':'';frameGs[1].style.display=f?'':'none';
+    placeHero(pos.x,pos.y,f?-2:0);
+    if(k<1)requestAnimationFrame(tick);
+    else{cur=nxt;frameGs[0].style.display='';frameGs[1].style.display='none';placeHero(pos.x,pos.y);update();runRoute(route)}
+  }
+  requestAnimationFrame(tick);
+}
+
+// ── 카드
+const visited=new Set();
+function update(){
+  nodeEls.forEach((g,i)=>g.classList.toggle('cur',i===cur));
+  const s=STAGES[cur];
+  if(s.kind==='stage')visited.add(s.id);
+  document.getElementById('progress').textContent=`STAGE ${visited.size} / 3 확인`;
+  document.getElementById('card').innerHTML=`
+    <div class="kicker">${s.kicker}</div>
+    <h2>${s.title}</h2>
+    <div class="desc">${s.desc}</div>
+    ${s.meta.length?`<div class="meta">${s.meta.map(m=>`<span>${m}</span>`).join('')}</div>`:''}
+    ${cur?`<div class="go">▶ Enter 또는 다시 클릭해서 입장</div>`:`<div class="go">▶ → 키를 눌러 출발</div>`}`;
+}
+
+// ── 입장
+function enter(){
+  const s=STAGES[cur];
+  document.getElementById('enterTitle').textContent=s.kind==='stage'?`STAGE ${s.num} START`:s.label;
+  document.getElementById('enterMsg').innerHTML=
+    `미리보기라서 여기서 멈춥니다.<br>실제 사이트에서는 <code>${s.link}</code> 로 이동합니다.`;
+  document.getElementById('enter').classList.add('on');
+}
+document.getElementById('backBtn').onclick=()=>document.getElementById('enter').classList.remove('on');
+nodeEls.forEach((g,i)=>g.addEventListener('click',()=>{if(i===cur&&!moving)enter()}));
+
+// ── 시작 / 스킵
+let started=false;
+function start(){
+  if(started)return;started=true;
+  document.getElementById('title').classList.add('hide');
+  const w=document.getElementById('world');w.classList.add('show');w.removeAttribute('aria-hidden');
+  placeHero(pos.x,pos.y);update();
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('skipBtn').onclick=()=>{
+  document.getElementById('enterTitle').textContent='SKIP';
+  document.getElementById('enterMsg').innerHTML='실제 사이트에서는 바로 <code>index.html</code>(지금의 포트폴리오 문서)로 이동합니다.';
+  document.getElementById('enter').classList.add('on');
+};
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('enter').classList.contains('on')){if(e.key==='Escape'||e.key==='Backspace')document.getElementById('backBtn').click();return}
+  if(!started){if(e.key==='Enter'||e.key===' ')start();return}
+  if(e.key==='ArrowRight'||e.key==='d')walkTo(cur+1);
+  else if(e.key==='ArrowLeft'||e.key==='a')walkTo(cur-1);
+  else if(e.key==='Enter'&&!moving)enter();
+});
+</script>
+</body>
+</html>
