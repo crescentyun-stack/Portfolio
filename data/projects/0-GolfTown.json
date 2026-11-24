@@ -52,7 +52,7 @@
       "what": "마우스 드래그 한 번으로 방향(좌우)·세기(위아래)·취소(조금만 당기면 발사 안 함)를 모두 정하고, 친 공이 살짝 떠오르게(`hopRatio`) 해서 낮은 턱을 넘길 수 있게 했습니다.",
       "how": "좌우로 끈 거리는 조준 방향 회전으로, 위아래로 당긴 거리는 0~1로 정규화한 세기(`power01`)로 바꾸고, 버튼을 떼면 `minPower`~`maxPower` 사이 세기로 `Shoot`합니다. 제공 `GolfBall`에는 세기에 비례한 위쪽 속도(`hopRatio`)만 더했습니다.",
       "why": "스페이스바 게이지는 방향(마우스)과 세기(키보드)를 따로 조작하고 왕복 타이밍을 노려야 하지만, 당긴 거리는 방향과 세기를 한 동작으로 정합니다. 어려움이 장애물의 타이밍에 있는 코스에서 게이지 타이밍까지 겹치면 실패의 원인을 구분하기 어렵습니다.",
-      "section": "핵심 기능 ① 당긴 거리를 세기로 바꾸기",
+      "section": "3.1 마우스로 당겨 치는 샷",
       "image": {
         "src": "images/shot.gif",
         "w": 800,
@@ -84,7 +84,7 @@
       "what": "풍차, 장애물이었다가 발판이 되는 기차, 도개교를 Animator로 만들어 스테이지마다 새 기믹을 하나씩 더해 갔습니다.",
       "how": "기차·도개교·배는 스크립트 없이 직접 만든 애니메이션 클립과 컨트롤러로 움직였고, 회전하는 다리와 배는 빈 부모(`BridgePivot`, `Boat Pivot`) 아래에서 자식의 로컬 좌표를 애니메이션했습니다.",
       "why": "레벨 디자인 과제라 움직임의 모양과 타이밍이 곧 난이도였기 때문에, 키프레임으로 움직임의 모양을 직접 디자인하고 눈으로 보며 조정할 수 있는 애니메이션을 스크립트 대신 선택했습니다.",
-      "section": "6.3 애니메이션으로 만든 기믹",
+      "section": "2.3 애니메이션으로 만든 기믹",
       "image": {
         "src": "images/bridge_boat.gif",
         "w": 640,
@@ -107,22 +107,13 @@
       "section": "8.1 애니메이션이 엉뚱한 위치 · 방향에서 재생되는 문제"
     },
     {
-      "title": "빌드에서 튜토리얼 팝업이 다시 뜨지 않는 문제",
-      "problem": "에디터에서 튜토리얼 기록을 전체 초기화한 뒤 빌드해도, 빌드본에서는 튜토리얼을 이미 본 것으로 처리되어 팝업이 뜨지 않았습니다.",
-      "cause": "Windows에서 `PlayerPrefs`는 레지스트리에 저장되는데, 에디터와 빌드본은 서로 다른 경로에 저장합니다.",
-      "solution": "메인 메뉴의 시작 버튼(`MainMenu.StartGame()`)에서 `PlayerPrefs.DeleteAll()`을 호출해, 어느 환경에서든 새 게임을 시작하면 튜토리얼 기록이 초기화되도록 했습니다.",
-      "result": "빌드본에서도 새 게임을 시작하면 로비와 각 스테이지의 튜토리얼 팝업이 처음 들어갈 때 다시 표시됩니다.",
-      "lesson": "에디터에서의 초기화가 빌드에도 적용된다고 가정하면 안 됩니다. 저장 데이터는 게임 안에서 초기화하는 경로를 따로 만들어 두어야 합니다.",
-      "section": "8.2 빌드에서 튜토리얼 팝업이 다시 뜨지 않는 문제"
-    },
-    {
       "title": "빌드에서 하늘의 해가 사라지는 문제",
       "problem": "에디터의 Game 뷰에서는 Polyverse Skies 하늘에 해가 보였지만, 빌드한 실행 파일에서는 해가 사라졌습니다.",
       "cause": "하늘 머티리얼의 해 방향 설정이 Global From Script였는데, 해 방향 값을 넣어 주는 `PolyverseSkies` 스크립트가 게임 씬에 없었습니다.",
       "solution": "하늘 머티리얼(`Sky 01`)의 설정을 Local From Material로 바꿔, 스크립트 없이 머티리얼에 저장된 방향값으로 해를 그리게 했습니다.",
       "result": "빌드에서도 에디터와 같은 위치에 해가 표시됩니다.",
       "lesson": "외부 에셋은 빌드에서 무엇에 의존하는지 설정 항목을 먼저 확인해야 합니다.",
-      "section": "8.3 빌드에서 하늘의 해가 사라지는 문제"
+      "section": "8.2 빌드에서 하늘의 해가 사라지는 문제"
     }
   ],
   "screenshots": [
@@ -139,10 +130,16 @@
       "caption": "마을이 채워지는 모습"
     },
     {
-      "src": "images/stage2.png",
-      "w": 1920,
-      "h": 540,
-      "caption": "Stage 2"
+      "src": "images/lobby.gif",
+      "w": 640,
+      "h": 360,
+      "caption": "로비 이동"
+    },
+    {
+      "src": "images/bridge_boat.gif",
+      "w": 640,
+      "h": 360,
+      "caption": "도개교와 배"
     },
     {
       "src": "images/stage3.png",
@@ -151,16 +148,10 @@
       "caption": "Stage 3"
     },
     {
-      "src": "images/stage4.png",
-      "w": 1920,
-      "h": 540,
-      "caption": "Stage 4"
-    },
-    {
-      "src": "images/bridge_boat.gif",
-      "w": 640,
-      "h": 360,
-      "caption": "도개교와 배"
+      "src": "images/option.gif",
+      "w": 800,
+      "h": 450,
+      "caption": "Pause 창"
     }
   ],
   "retro": {
@@ -194,10 +185,10 @@
         ]
       },
       {
-        "key": "arch",
-        "title": "전체 구조",
+        "key": "level",
+        "title": "레벨 디자인",
         "sectionPath": [
-          "2. 전체 구조"
+          "2. 레벨 디자인"
         ]
       },
       {
@@ -222,10 +213,10 @@
         ]
       },
       {
-        "key": "level",
-        "title": "레벨 디자인",
+        "key": "dev",
+        "title": "개발 과정",
         "sectionPath": [
-          "6. 레벨 디자인"
+          "7. 개발 과정"
         ]
       },
       {
@@ -275,46 +266,28 @@
         ]
       },
       {
-        "key": "scope",
+        "key": "loop",
         "chapter": "overview",
-        "layout": "full",
-        "tab": "개요",
+        "layout": "visual",
+        "tab": "흐름",
         "title": {
-          "text": "1.5 제공 코드와 내가 작성한 범위",
+          "text": "1.4 핵심 루프",
           "verbatim": true
         },
         "lead": null,
         "sectionPath": [
           "1. 프로젝트 개요",
-          "1.5 제공 코드와 내가 작성한 범위"
-        ],
-        "points": [],
-        "visuals": [
-          {
-            "kind": "table",
-            "n": 1,
-            "fp": "구분|클래스|하는 일"
-          }
-        ]
-      },
-      {
-        "key": "arch-diagram",
-        "chapter": "arch",
-        "layout": "full",
-        "tab": "구조",
-        "title": {
-          "text": "2.2 아키텍처",
-          "verbatim": true
-        },
-        "lead": null,
-        "sectionPath": [
-          "2. 전체 구조",
-          "2.2 아키텍처"
+          "1.4 핵심 루프"
         ],
         "points": [
           {
             "label": "",
-            "text": "제공 코드는 GolfBall에 값 하나(hopRatio)를 더한 것 말고는 고치지 않았고, 새 기능은 그 바깥에 클래스로 붙였습니다.",
+            "text": "로비 → 스테이지 → 로비를 반복하는 동안 클리어 기록이 쌓이고, 기록이 쌓일수록 로비 마을에 건물이 하나씩 늘어납니다.",
+            "verbatim": true
+          },
+          {
+            "label": "",
+            "text": "플레이어는 마을이 채워지는 모습으로 자신의 진행도를 확인합니다.",
             "verbatim": true
           }
         ],
@@ -327,8 +300,141 @@
         ]
       },
       {
+        "key": "principle",
+        "chapter": "level",
+        "layout": "full",
+        "tab": "구조",
+        "title": {
+          "text": "2.1 설계 원칙",
+          "verbatim": true
+        },
+        "lead": {
+          "text": "작업지시서는 \"장애물 하나는 플레이어에게 던지는 질문 하나\"이고, \"난이도는 장애물 안에 있지 않고 배치 안에 있다\"고 정의합니다.",
+          "verbatim": true
+        },
+        "sectionPath": [
+          "2. 레벨 디자인",
+          "2.1 설계 원칙"
+        ],
+        "points": [],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "스테이지|장애물이 묻는 것|구간 1 (소개)|구간 2 (응용)|구간 3"
+          }
+        ]
+      },
+      {
+        "key": "stages",
+        "chapter": "level",
+        "layout": "screens",
+        "tab": "결과",
+        "title": {
+          "text": "2.2 스테이지별 구성",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "2. 레벨 디자인",
+          "2.2 스테이지별 구성"
+        ],
+        "points": [],
+        "visuals": [
+          {
+            "kind": "image",
+            "src": "images/stage2.png",
+            "w": 1920,
+            "h": 540,
+            "caption": {
+              "text": "Stage 2",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "2. 레벨 디자인",
+              "2.2 스테이지별 구성",
+              "Stage 2 · 풍차"
+            ]
+          },
+          {
+            "kind": "image",
+            "src": "images/stage3.png",
+            "w": 1920,
+            "h": 540,
+            "caption": {
+              "text": "Stage 3",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "2. 레벨 디자인",
+              "2.2 스테이지별 구성",
+              "Stage 3 · 기차"
+            ]
+          },
+          {
+            "kind": "image",
+            "src": "images/stage4.png",
+            "w": 1920,
+            "h": 540,
+            "caption": {
+              "text": "Stage 4",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "2. 레벨 디자인",
+              "2.2 스테이지별 구성",
+              "Stage 4 · 도개교"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "anim",
+        "chapter": "level",
+        "layout": "visual",
+        "tab": "구현",
+        "title": {
+          "text": "2.3 애니메이션으로 만든 기믹",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "2. 레벨 디자인",
+          "2.3 애니메이션으로 만든 기믹"
+        ],
+        "points": [
+          {
+            "label": "",
+            "text": "스테이지 4 구간 2: 공이 다리를 건넌 뒤 양쪽 도개교가 들어 올려지고, 그 사이로 배가 지나갑니다.",
+            "verbatim": true
+          },
+          {
+            "label": "",
+            "text": "회전하는 다리와 배는 오브젝트를 바로 애니메이션하지 않고, 빈 부모(BridgePivot, Boat Pivot) 아래에 넣어 자식의 로컬 좌표를 애니메이션했습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "image",
+            "src": "images/bridge_boat.gif",
+            "w": 640,
+            "h": 360,
+            "caption": {
+              "text": "도개교와 배",
+              "verbatim": true
+            }
+          },
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "기믹|애니메이션|제작"
+          }
+        ]
+      },
+      {
         "key": "record-choice",
-        "chapter": "arch",
+        "chapter": "level",
         "layout": "visual",
         "tab": "선택",
         "title": {
@@ -337,7 +443,7 @@
         },
         "lead": null,
         "sectionPath": [
-          "2. 전체 구조",
+          "2. 레벨 디자인",
           "2.4 고민과 선택: 클리어 기록을 씬 사이에 어떻게 넘길 것인가"
         ],
         "points": [
@@ -380,8 +486,7 @@
         },
         "sectionPath": [
           "3. 시스템 ① 샷과 이동",
-          "3.1 마우스로 당겨 치는 샷",
-          "개요"
+          "3.1 마우스로 당겨 치는 샷"
         ],
         "points": [
           {
@@ -399,12 +504,7 @@
             "caption": {
               "text": "샷 조작",
               "verbatim": true
-            },
-            "sectionPath": [
-              "3. 시스템 ① 샷과 이동",
-              "3.1 마우스로 당겨 치는 샷",
-              "핵심 기능 ① 당긴 거리를 세기로 바꾸기"
-            ]
+            }
           },
           {
             "kind": "table",
@@ -439,11 +539,11 @@
           {
             "kind": "code",
             "n": 1,
+            "fp": "// Golf.cs — 공이 멈춰 있을 때만 입력을 받는다",
             "lines": [
               7,
               26
-            ],
-            "fp": "// Golf.cs — 공이 멈춰 있을 때만 입력을 받는다"
+            ]
           }
         ]
       },
@@ -466,11 +566,6 @@
           "핵심 기능 ② 살짝 띄워 치기 (`hopRatio`)"
         ],
         "points": [
-          {
-            "label": "문제",
-            "text": "낮은 턱이나 기차 발판처럼 바닥보다 조금 높은 곳으로는 공을 올릴 수 없었습니다.",
-            "verbatim": true
-          },
           {
             "label": "",
             "text": "세기에 비례하므로 약하게 치면 거의 뜨지 않고, 세게 치면 높이 뜹니다.",
@@ -517,6 +612,56 @@
             "kind": "table",
             "n": 1,
             "fp": "|[A] 스페이스바 게이지 (제공 예제)|[B] 마우스로 당긴 거리 ✓"
+          }
+        ]
+      },
+      {
+        "key": "lobby-choice",
+        "chapter": "shot",
+        "layout": "visual",
+        "tab": "선택",
+        "title": {
+          "text": "고민과 선택: 로비에서 스테이지를 어떻게 고르게 할 것인가",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "3. 시스템 ① 샷과 이동",
+          "3.2 로비 이동",
+          "고민과 선택: 로비에서 스테이지를 어떻게 고르게 할 것인가"
+        ],
+        "points": [
+          {
+            "label": "최종 결정",
+            "text": "\"골프공이 되어 마을을 살린다\"는 컨셉에서는 플레이어가 마을 안에 있어야 건물이 생기고 기차가 달리는 변화를 직접 볼 수 있습니다.",
+            "verbatim": true
+          },
+          {
+            "label": "감수한 대가",
+            "text": "순서를 강제하지 않았더니, 테스트에서 가장 쉬운 스테이지 1을 가장 나중에 깨는 플레이어가 나왔습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "image",
+            "src": "images/lobby.gif",
+            "w": 640,
+            "h": 360,
+            "caption": {
+              "text": "로비 이동",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "3. 시스템 ① 샷과 이동",
+              "3.2 로비 이동",
+              "개요"
+            ]
+          },
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "|[A] 메뉴 화면에서 버튼으로 선택|[B] 로비를 공으로 돌아다니며 입구로 들어감 ✓"
           }
         ]
       },
@@ -590,11 +735,11 @@
           {
             "kind": "code",
             "n": 1,
+            "fp": "// ListUnlocker.cs",
             "lines": [
               3,
               21
-            ],
-            "fp": "// ListUnlocker.cs"
+            ]
           }
         ]
       },
@@ -689,135 +834,31 @@
         ]
       },
       {
-        "key": "principle",
-        "chapter": "level",
+        "key": "ai",
+        "chapter": "dev",
         "layout": "full",
-        "tab": "구조",
+        "tab": "",
         "title": {
-          "text": "6.1 설계 원칙",
-          "verbatim": true
-        },
-        "lead": {
-          "text": "작업지시서는 \"장애물 하나는 플레이어에게 던지는 질문 하나\"이고, \"난이도는 장애물 안에 있지 않고 배치 안에 있다\"고 정의합니다.",
-          "verbatim": true
-        },
-        "sectionPath": [
-          "6. 레벨 디자인",
-          "6.1 설계 원칙"
-        ],
-        "points": [],
-        "visuals": [
-          {
-            "kind": "table",
-            "n": 1,
-            "fp": "스테이지|장애물이 묻는 것|구간 1 (소개)|구간 2 (응용)|구간 3"
-          }
-        ]
-      },
-      {
-        "key": "stages",
-        "chapter": "level",
-        "layout": "screens",
-        "tab": "결과",
-        "title": {
-          "text": "6.2 스테이지별 구성",
+          "text": "7.2 AI와 외부 리소스 활용",
           "verbatim": true
         },
         "lead": null,
         "sectionPath": [
-          "6. 레벨 디자인",
-          "6.2 스테이지별 구성"
-        ],
-        "points": [],
-        "visuals": [
-          {
-            "kind": "image",
-            "src": "images/stage2.png",
-            "w": 1920,
-            "h": 540,
-            "caption": {
-              "text": "Stage 2",
-              "verbatim": true
-            },
-            "sectionPath": [
-              "6. 레벨 디자인",
-              "6.2 스테이지별 구성",
-              "Stage 2 · 풍차"
-            ]
-          },
-          {
-            "kind": "image",
-            "src": "images/stage3.png",
-            "w": 1920,
-            "h": 540,
-            "caption": {
-              "text": "Stage 3",
-              "verbatim": true
-            },
-            "sectionPath": [
-              "6. 레벨 디자인",
-              "6.2 스테이지별 구성",
-              "Stage 3 · 기차"
-            ]
-          },
-          {
-            "kind": "image",
-            "src": "images/stage4.png",
-            "w": 1920,
-            "h": 540,
-            "caption": {
-              "text": "Stage 4",
-              "verbatim": true
-            },
-            "sectionPath": [
-              "6. 레벨 디자인",
-              "6.2 스테이지별 구성",
-              "Stage 4 · 도개교"
-            ]
-          }
-        ]
-      },
-      {
-        "key": "anim",
-        "chapter": "level",
-        "layout": "visual",
-        "tab": "구현",
-        "title": {
-          "text": "6.3 애니메이션으로 만든 기믹",
-          "verbatim": true
-        },
-        "lead": null,
-        "sectionPath": [
-          "6. 레벨 디자인",
-          "6.3 애니메이션으로 만든 기믹"
+          "7. 개발 과정",
+          "7.2 AI와 외부 리소스 활용"
         ],
         "points": [
           {
             "label": "",
-            "text": "회전하는 다리와 배는 오브젝트를 바로 애니메이션하지 않고, 빈 부모(BridgePivot, Boat Pivot) 아래에 넣어 자식의 로컬 좌표를 애니메이션했습니다.",
+            "text": "AI에는 정해진 시안을 그대로 옮기는 반복 작업(UI 계층 생성, 이미지 완성)을 맡기고, 무엇을 어디에 어떻게 보여줄지는 직접 정했습니다.",
             "verbatim": true
-          },
-          {
-            "label": "최종 결정",
-            "text": "레벨 디자인 과제라 움직임의 모양과 타이밍이 곧 난이도였기 때문에, 그것을 눈으로 보며 조정할 수 있는 애니메이션이 잘 맞았습니다.",
-            "verbatim": false
           }
         ],
         "visuals": [
           {
-            "kind": "image",
-            "src": "images/bridge_boat.gif",
-            "w": 640,
-            "h": 360,
-            "caption": {
-              "text": "도개교와 배",
-              "verbatim": true
-            }
-          },
-          {
             "kind": "table",
             "n": 1,
-            "fp": "기믹|애니메이션|제작"
+            "fp": "대상|도구 · 출처|내가 한 일|맡긴 일"
           }
         ]
       },
@@ -860,56 +901,18 @@
         "visuals": []
       },
       {
-        "key": "ts-prefs",
-        "chapter": "trouble",
-        "layout": "problem",
-        "tab": "문제 해결",
-        "title": {
-          "text": "8.2 빌드에서 튜토리얼 팝업이 다시 뜨지 않는 문제",
-          "verbatim": true
-        },
-        "lead": null,
-        "sectionPath": [
-          "8. 문제 해결 기록",
-          "8.2 빌드에서 튜토리얼 팝업이 다시 뜨지 않는 문제"
-        ],
-        "points": [
-          {
-            "label": "문제",
-            "text": "에디터에서 튜토리얼 기록을 전체 초기화(Reset ALL Tutorial Records)한 뒤 빌드해도, 빌드본을 실행하면 튜토리얼을 이미 본 것으로 처리되어 팝업이 뜨지 않았습니다.",
-            "verbatim": true
-          },
-          {
-            "label": "원인",
-            "text": "Windows에서 PlayerPrefs는 레지스트리에 저장되는데, 에디터와 빌드본은 서로 다른 경로에 저장합니다.",
-            "verbatim": true
-          },
-          {
-            "label": "해결",
-            "text": "메인 메뉴의 시작 버튼(MainMenu.StartGame())에서 PlayerPrefs.DeleteAll()을 호출해, 어느 환경에서든 새 게임을 시작하면 튜토리얼 기록이 초기화되도록 했습니다.",
-            "verbatim": true
-          },
-          {
-            "label": "결과",
-            "text": "빌드본에서도 새 게임을 시작하면 로비와 각 스테이지의 튜토리얼 팝업이 처음 들어갈 때 다시 표시됩니다.",
-            "verbatim": true
-          }
-        ],
-        "visuals": []
-      },
-      {
         "key": "ts-sun",
         "chapter": "trouble",
         "layout": "problem",
         "tab": "문제 해결",
         "title": {
-          "text": "8.3 빌드에서 하늘의 해가 사라지는 문제",
+          "text": "8.2 빌드에서 하늘의 해가 사라지는 문제",
           "verbatim": true
         },
         "lead": null,
         "sectionPath": [
           "8. 문제 해결 기록",
-          "8.3 빌드에서 하늘의 해가 사라지는 문제"
+          "8.2 빌드에서 하늘의 해가 사라지는 문제"
         ],
         "points": [
           {

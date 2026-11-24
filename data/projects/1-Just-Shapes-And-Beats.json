@@ -90,13 +90,13 @@
   ],
   "troubleshooting": [
     {
-      "title": "대시 입력이 가끔 씹히는 문제",
+      "title": "대시 입력이 누락되는 문제",
       "problem": "`Space`를 눌러도 대시가 나가지 않는 경우가 자주 있었습니다.",
       "cause": "이동·대시를 `FixedUpdate`에서 처리했는데, `wasPressedThisFrame`은 키가 눌린 렌더 프레임에만 true라 그 프레임에 `FixedUpdate`가 호출되지 않으면 입력이 사라졌습니다.",
       "solution": "입력 감지를 `Update`로 옮기고, 대시 속도 적용은 코루틴에서 처리했습니다.",
       "result": "대시 입력 누락이 사라졌습니다.",
       "lesson": "\"한 프레임만 true인 입력\"은 `Update`에서 읽어야 합니다.",
-      "section": "8.1 대시 입력이 가끔 씹히는 문제"
+      "section": "3.4 대시 입력이 누락되는 문제"
     },
     {
       "title": "대시할 때만 잔상이 나오는 문제",
@@ -105,7 +105,7 @@
       "solution": "`WaveTrailEffect`를 새로 작성해 지난 프레임과 현재 프레임의 위치 차이로 이동을 판단하고, 크기는 `lossyScale`을 넣었습니다.",
       "result": "이동 방식과 관계없이 움직이면 항상 잔상이 생기고, 이동 0.06초 · 대시 0.02초 간격으로 대시가 더 촘촘해졌습니다.",
       "lesson": "조건문이 틀린 게 아니라 \"무엇을 기준으로 판단하는가\"가 틀릴 수 있습니다.",
-      "section": "8.2 대시할 때만 잔상이 나오고, 평소 이동에는 안 나오는 문제"
+      "section": "3.5 대시할 때만 잔상이 나오고, 평소 이동에는 안 나오는 문제"
     },
     {
       "title": "클리어 삼각형 중복·지연 생성 문제",
@@ -114,7 +114,7 @@
       "solution": "`MusicLoopManager`로 다시 작성해 `isTriangleSpawned`로 삼각형을 최대 1개로 제한하고, 구간 전환 시 `CancelInvoke()`로 이전 구간의 예약을 지웠습니다.",
       "result": "9개 구간을 진행하는 동안 삼각형이 중복되거나 늦게 생기지 않습니다.",
       "lesson": "코루틴·`Invoke`처럼 \"나중에 실행될 일\"을 예약하면, 취소하는 코드도 같이 짜야 합니다.",
-      "section": "8.3 클리어 삼각형이 여러 개 생기거나, 넘어간 구간의 삼각형이 늦게 나타나는 문제"
+      "section": "5.4 클리어 삼각형이 여러 개 생기거나, 넘어간 구간의 삼각형이 늦게 나타나는 문제"
     }
   ],
   "screenshots": [
@@ -123,6 +123,12 @@
       "w": 800,
       "h": 450,
       "caption": "대시"
+    },
+    {
+      "src": "images/hit.gif",
+      "w": 800,
+      "h": 450,
+      "caption": "피격과무적"
     },
     {
       "src": "images/obstacle.gif",
@@ -168,7 +174,7 @@
       "공통 `HitPlayer()` 함수로 통일",
       "ScriptableObject로 타이밍 데이터 분리"
     ],
-    "section": "9. 돌아보기"
+    "section": "8. 돌아보기"
   },
   "deck": {
     "chapters": [
@@ -212,13 +218,6 @@
         "title": "레벨 구성과 연출",
         "sectionPath": [
           "6. 레벨 구성과 연출"
-        ]
-      },
-      {
-        "key": "trouble",
-        "title": "문제 해결 기록",
-        "sectionPath": [
-          "8. 문제 해결 기록"
         ]
       }
     ],
@@ -285,7 +284,7 @@
           {
             "kind": "mermaid",
             "n": 1,
-            "fp": "flowchart LR"
+            "fp": "flowchart TB"
           }
         ]
       },
@@ -295,13 +294,13 @@
         "layout": "visual",
         "tab": "선택",
         "title": {
-          "text": "2.4 고민과 선택: 씬 사이에 \"어디로, 어떤 연출로\"를 어떻게 넘길 것인가",
+          "text": "2.3 고민과 선택: 씬 사이에 \"어디로, 어떤 연출로\"를 어떻게 넘길 것인가",
           "verbatim": true
         },
         "lead": null,
         "sectionPath": [
           "2. 전체 구조",
-          "2.4 고민과 선택: 씬 사이에 \"어디로, 어떤 연출로\"를 어떻게 넘길 것인가"
+          "2.3 고민과 선택: 씬 사이에 \"어디로, 어떤 연출로\"를 어떻게 넘길 것인가"
         ],
         "points": [
           {
@@ -359,7 +358,11 @@
             "caption": {
               "text": "대시",
               "verbatim": true
-            }
+            },
+            "sectionPath": [
+              "3. 시스템 ① 플레이어",
+              "3.1 이동과 대시"
+            ]
           },
           {
             "kind": "code",
@@ -371,7 +374,7 @@
       {
         "key": "invincible-choice",
         "chapter": "player",
-        "layout": "full",
+        "layout": "visual",
         "tab": "선택",
         "title": {
           "text": "고민과 선택: 무적을 어떻게 구현할 것인가",
@@ -380,7 +383,7 @@
         "lead": null,
         "sectionPath": [
           "3. 시스템 ① 플레이어",
-          "3.2 피격과 무적",
+          "3.3 피격과 무적",
           "고민과 선택: 무적을 어떻게 구현할 것인가"
         ],
         "points": [
@@ -397,9 +400,105 @@
         ],
         "visuals": [
           {
+            "kind": "image",
+            "src": "images/hit.gif",
+            "w": 800,
+            "h": 450,
+            "caption": {
+              "text": "피격과무적",
+              "verbatim": true
+            },
+            "sectionPath": [
+              "3. 시스템 ① 플레이어",
+              "3.3 피격과 무적"
+            ]
+          },
+          {
             "kind": "table",
             "n": 1,
             "fp": "|[A] 콜라이더를 끔 ✓|[B] isInvincible 플래그로 데미지만 무시"
+          }
+        ]
+      },
+      {
+        "key": "ts-dash",
+        "chapter": "player",
+        "layout": "problem",
+        "tab": "문제 해결",
+        "title": {
+          "text": "3.4 대시 입력이 누락되는 문제",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "3. 시스템 ① 플레이어",
+          "3.4 대시 입력이 누락되는 문제"
+        ],
+        "points": [
+          {
+            "label": "문제",
+            "text": "Space를 눌러도 대시가 나가지 않는 경우가 자주 있었습니다.",
+            "verbatim": true
+          },
+          {
+            "label": "원인",
+            "text": "이동 · 대시를 FixedUpdate에서 처리했는데, wasPressedThisFrame은 키가 눌린 그 렌더 프레임에만 true입니다.",
+            "verbatim": true
+          },
+          {
+            "label": "해결",
+            "text": "입력 감지를 Update로 옮기고, 대시 속도 적용은 코루틴에서 처리했습니다 (6/25 커밋 \"fixed update를 update로 수정함\").",
+            "verbatim": true
+          },
+          {
+            "label": "결과",
+            "text": "대시 입력 누락이 사라졌습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": []
+      },
+      {
+        "key": "ts-trail",
+        "chapter": "player",
+        "layout": "problem",
+        "tab": "문제 해결",
+        "title": {
+          "text": "3.5 대시할 때만 잔상이 나오고, 평소 이동에는 안 나오는 문제",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "3. 시스템 ① 플레이어",
+          "3.5 대시할 때만 잔상이 나오고, 평소 이동에는 안 나오는 문제"
+        ],
+        "points": [
+          {
+            "label": "문제",
+            "text": "이동 중에도 잔상이 나와야 하는데, 대시할 때만 잔상이 생겼습니다.",
+            "verbatim": true
+          },
+          {
+            "label": "원인",
+            "text": "그런데 평소 이동은 transform.position +=로 하고 있어 물리 속도가 항상 0이었고, velocity를 쓰는 대시에서만 잔상이 나왔습니다.",
+            "verbatim": true
+          },
+          {
+            "label": "해결",
+            "text": "WaveTrailEffect를 새로 작성해 지난 프레임과 현재 프레임의 위치 차이로 이동을 판단하고, 크기는 실제 월드 크기인 lossyScale을 넣었습니다.",
+            "verbatim": true
+          },
+          {
+            "label": "결과",
+            "text": "이동 방식과 관계없이 움직이면 항상 잔상이 생기고, 이동 0.06초 · 대시 0.02초 간격으로 대시가 더 촘촘해졌습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "|As-Is (DashEcho)|To-Be (WaveTrailEffect)"
           }
         ]
       },
@@ -441,7 +540,7 @@
           {
             "kind": "mermaid",
             "n": 1,
-            "fp": "stateDiagram-v2"
+            "fp": "flowchart LR"
           }
         ]
       },
@@ -471,11 +570,38 @@
           {
             "kind": "code",
             "n": 1,
+            "fp": "// Obstacle.cs",
             "lines": [
               3,
               22
-            ],
-            "fp": "// Obstacle.cs"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "laser",
+        "chapter": "hazard",
+        "layout": "full",
+        "tab": "구현",
+        "title": {
+          "text": "패턴에서 시간값 덮어쓰기",
+          "verbatim": true
+        },
+        "lead": {
+          "text": "같은 레이저 프리팹을 여러 패턴에서 다른 속도로 쓰기 위해, 스포너가 생성 직후 시간값을 바꿉니다.",
+          "verbatim": true
+        },
+        "sectionPath": [
+          "4. 시스템 ② 장애물과 패턴",
+          "4.1 장애물 생명주기 — 경고 → 공격 → 소멸",
+          "패턴에서 시간값 덮어쓰기"
+        ],
+        "points": [],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "|기본값|Phase3 연속 레이저|Phase4 레이저 세트"
           }
         ]
       },
@@ -536,7 +662,7 @@
           {
             "kind": "code",
             "n": 1,
-            "fp": "// StagePhase5.cs — Phase2(8방향 폭발) + Phase4(레이저 세트) 위에 Z자 원만 추가"
+            "fp": "// StagePhase5.cs — Phase2(8방향 폭발) + Phase4(레이저 세트) 위에 Z자 원만"
           }
         ]
       },
@@ -556,11 +682,6 @@
           "고민과 선택: 비슷한 패턴을 어떻게 재사용할 것인가"
         ],
         "points": [
-          {
-            "label": "최종 결정",
-            "text": "무엇보다 OnDisable의 정리 코드까지 상속되어 구간이 바뀔 때 이전 패턴이 남는 실수를 막을 수 있었습니다.",
-            "verbatim": true
-          },
           {
             "label": "감수한 대가",
             "text": "조합이 늘어나면 [C]가 맞습니다(9.3).",
@@ -584,10 +705,7 @@
           "text": "5.1 음악 구간 루프",
           "verbatim": true
         },
-        "lead": {
-          "text": "플레이어가 클리어 삼각형을 먹기 전까지는 현재 구간 안에서 음악을 되감습니다.",
-          "verbatim": true
-        },
+        "lead": null,
         "sectionPath": [
           "5. 시스템 ③ 음악 구간 루프와 진행",
           "5.1 음악 구간 루프"
@@ -596,11 +714,6 @@
           {
             "label": "",
             "text": "마지막 9구간은 루프를 돌지 않습니다.",
-            "verbatim": true
-          },
-          {
-            "label": "",
-            "text": "곡이 끝나는 순간 마지막 삼각형을 띄워, 곡 끝과 튜토리얼 끝이 맞물리게 했습니다.",
             "verbatim": true
           }
         ],
@@ -649,6 +762,45 @@
             "kind": "table",
             "n": 1,
             "fp": "|[A] 곡 전체 타임라인 (원작 방식)|[B] 구간 반복 + 삼각형으로 진행 ✓|[C] 패턴은 시간 기준, 음악은 BGM"
+          }
+        ]
+      },
+      {
+        "key": "ts-triangle",
+        "chapter": "music",
+        "layout": "problem",
+        "tab": "문제 해결",
+        "title": {
+          "text": "5.4 클리어 삼각형이 여러 개 생기거나, 넘어간 구간의 삼각형이 늦게 나타나는 문제",
+          "verbatim": true
+        },
+        "lead": null,
+        "sectionPath": [
+          "5. 시스템 ③ 음악 구간 루프와 진행",
+          "5.4 클리어 삼각형이 여러 개 생기거나, 넘어간 구간의 삼각형이 늦게 나타나는 문제"
+        ],
+        "points": [
+          {
+            "label": "문제",
+            "text": "한 구간에 삼각형이 2개 이상 생기거나, 다음 구간이 시작된 뒤에 이전 구간의 삼각형이 튀어나왔습니다.",
+            "verbatim": true
+          },
+          {
+            "label": "해결",
+            "text": "MusicLoopManager로 다시 작성했습니다.",
+            "verbatim": true
+          },
+          {
+            "label": "결과",
+            "text": "9개 구간을 진행하는 동안 삼각형이 중복되거나 늦게 생기지 않습니다.",
+            "verbatim": true
+          }
+        ],
+        "visuals": [
+          {
+            "kind": "table",
+            "n": 1,
+            "fp": "|As-Is (Music)|To-Be (MusicLoopManager)"
           }
         ]
       },
@@ -727,13 +879,7 @@
           "6.2 보스전 시퀀스",
           "핵심 기능"
         ],
-        "points": [
-          {
-            "label": "최종 결정",
-            "text": "보스전은 분기 없이 한 방향으로만 흐르는 연출이라, \"앞 단계가 끝나면 다음\"을 그대로 적을 수 있는 코루틴이 가장 읽기 쉬웠습니다.",
-            "verbatim": false
-          }
-        ],
+        "points": [],
         "visuals": [
           {
             "kind": "code",
@@ -778,127 +924,6 @@
               "text": "게임오버",
               "verbatim": true
             }
-          }
-        ]
-      },
-      {
-        "key": "ts-dash",
-        "chapter": "trouble",
-        "layout": "problem",
-        "tab": "문제 해결",
-        "title": {
-          "text": "8.1 대시 입력이 가끔 씹히는 문제",
-          "verbatim": true
-        },
-        "lead": null,
-        "sectionPath": [
-          "8. 문제 해결 기록",
-          "8.1 대시 입력이 가끔 씹히는 문제"
-        ],
-        "points": [
-          {
-            "label": "문제",
-            "text": "Space를 눌러도 대시가 나가지 않는 경우가 자주 있었습니다.",
-            "verbatim": true
-          },
-          {
-            "label": "원인",
-            "text": "이동 · 대시를 FixedUpdate에서 처리했는데, wasPressedThisFrame은 키가 눌린 그 렌더 프레임에만 true입니다.",
-            "verbatim": true
-          },
-          {
-            "label": "해결",
-            "text": "입력 감지를 Update로 옮기고, 대시 속도 적용은 코루틴에서 처리했습니다",
-            "verbatim": true
-          },
-          {
-            "label": "결과",
-            "text": "대시 입력 누락이 사라졌습니다.",
-            "verbatim": true
-          }
-        ],
-        "visuals": []
-      },
-      {
-        "key": "ts-trail",
-        "chapter": "trouble",
-        "layout": "problem",
-        "tab": "문제 해결",
-        "title": {
-          "text": "8.2 대시할 때만 잔상이 나오고, 평소 이동에는 안 나오는 문제",
-          "verbatim": true
-        },
-        "lead": null,
-        "sectionPath": [
-          "8. 문제 해결 기록",
-          "8.2 대시할 때만 잔상이 나오고, 평소 이동에는 안 나오는 문제"
-        ],
-        "points": [
-          {
-            "label": "문제",
-            "text": "이동 중에도 잔상이 나와야 하는데, 대시할 때만 잔상이 생겼습니다.",
-            "verbatim": true
-          },
-          {
-            "label": "원인",
-            "text": "그런데 평소 이동은 transform.position +=로 하고 있어 물리 속도가 항상 0이었고, velocity를 쓰는 대시에서만 잔상이 나왔습니다.",
-            "verbatim": true
-          },
-          {
-            "label": "해결",
-            "text": "WaveTrailEffect를 새로 작성해 지난 프레임과 현재 프레임의 위치 차이로 이동을 판단하고, 크기는 실제 월드 크기인 lossyScale을 넣었습니다.",
-            "verbatim": true
-          },
-          {
-            "label": "결과",
-            "text": "이동 방식과 관계없이 움직이면 항상 잔상이 생기고, 이동 0.06초 · 대시 0.02초 간격으로 대시가 더 촘촘해졌습니다.",
-            "verbatim": true
-          }
-        ],
-        "visuals": [
-          {
-            "kind": "table",
-            "n": 1,
-            "fp": "|As-Is (DashEcho)|To-Be (WaveTrailEffect)"
-          }
-        ]
-      },
-      {
-        "key": "ts-triangle",
-        "chapter": "trouble",
-        "layout": "problem",
-        "tab": "문제 해결",
-        "title": {
-          "text": "8.3 클리어 삼각형이 여러 개 생기거나, 넘어간 구간의 삼각형이 늦게 나타나는 문제",
-          "verbatim": true
-        },
-        "lead": null,
-        "sectionPath": [
-          "8. 문제 해결 기록",
-          "8.3 클리어 삼각형이 여러 개 생기거나, 넘어간 구간의 삼각형이 늦게 나타나는 문제"
-        ],
-        "points": [
-          {
-            "label": "문제",
-            "text": "한 구간에 삼각형이 2개 이상 생기거나, 다음 구간이 시작된 뒤에 이전 구간의 삼각형이 튀어나왔습니다.",
-            "verbatim": true
-          },
-          {
-            "label": "해결",
-            "text": "isTriangleSpawned 플래그로 화면에 삼각형을 최대 1개로 제한하고, ApplyStageSettings() 시작 시 CancelInvoke()로 이전 구간의 예약을 지웠습니다.",
-            "verbatim": true
-          },
-          {
-            "label": "결과",
-            "text": "9개 구간을 진행하는 동안 삼각형이 중복되거나 늦게 생기지 않습니다.",
-            "verbatim": true
-          }
-        ],
-        "visuals": [
-          {
-            "kind": "table",
-            "n": 1,
-            "fp": "|As-Is (Music)|To-Be (MusicLoopManager)"
           }
         ]
       }
