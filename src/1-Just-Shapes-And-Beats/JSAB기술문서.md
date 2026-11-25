@@ -702,7 +702,7 @@ yield return StartCoroutine(temple.BuildTempleChainSequence());
 커밋 24개로 진행했습니다. 커밋 메시지에 날짜와 작업 장소(학원 · 집)를 적어 하루 단위로 진행을 기록했습니다.
 
 ```mermaid
-%%{init: {'theme':'neutral'}}%%
+%%{init: {'theme':'neutral', 'gantt': {'useWidth': 1200}}}%%
 gantt
     title 개발 일정 타임라인
     dateFormat YYYY-MM-DD
@@ -729,7 +729,7 @@ gantt
 
 
 ```mermaid
-%%{init: {'theme':'neutral'}}%%
+%%{init: {'theme':'neutral', 'gantt': {'useWidth': 1200}}}%%
 gantt
     dateFormat YYYY-MM-DD
     axisFormat %m/%d
