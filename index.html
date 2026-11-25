@@ -115,6 +115,19 @@ h2.t{font-family:"Galmuri14",var(--px);font-size:clamp(18px,2.4vw,32px);color:#f
 .ab .a{right:0;top:6px}.ab .b{left:0;top:44px}
 .ab small,.dpad small{position:absolute;font-family:var(--px);font-size:11px;color:#5b5348;white-space:nowrap}
 .ab .la{right:12px;top:56px}.ab .lb{left:12px;top:94px}
+.rcol{display:flex;flex-direction:column;align-items:center;gap:22px;justify-self:center}
+.startwrap{display:flex;flex-direction:column;align-items:center;gap:5px}
+.startbtn{width:58px;height:16px;border-radius:9px;background:#5b5348;box-shadow:0 3px 0 #2f2a25,inset 0 1px 0 #ffffff30;transform:rotate(-22deg)}
+.startbtn:active{transform:rotate(-22deg) translateY(2px);box-shadow:0 1px 0 #2f2a25}
+.startwrap small{font-family:var(--px);font-size:11px;color:#5b5348;letter-spacing:1px}
+.startwrap.ready .startbtn{background:#1f9e64;box-shadow:0 3px 0 #136140,0 0 12px #46d39a;animation:glow 1.2s ease-in-out infinite}
+.startwrap.ready small{color:#1f7a52}
+@keyframes glow{50%{box-shadow:0 3px 0 #136140,0 0 2px #46d39a}}
+.toast{position:absolute;inset:0;display:grid;place-items:center;background:#000c;z-index:4;text-align:center;padding:16px;animation:fade .2s}
+.toast b{display:block;font-family:"Galmuri14",var(--px);font-weight:400;font-size:clamp(18px,2.4vw,30px);color:#fff}
+.toast p{font-size:13px;color:var(--scrInk);margin-top:8px;line-height:1.7}
+.toast a{color:var(--scrHi)}
+.mlinks a.play{background:#1f9e64;border-color:#136140;color:#fff;box-shadow:3px 3px 0 #136140}
 .keys{grid-column:1/-1;text-align:center;font-family:var(--px);font-size:12px;color:#5b5348;margin-top:2px}
 .keys b{color:#b8325a;font-weight:400}
 
@@ -234,11 +247,14 @@ h2.t{font-family:"Galmuri14",var(--px);font-size:clamp(18px,2.4vw,32px);color:#f
             <button class="r" id="kR" aria-label="설명서 다음 쪽">▶</button><button class="d" id="kD" aria-label="다음 장면">▼</button>
           </div>
           <div class="bezel"><div class="screen" id="screen"><div class="scr" id="scr"></div></div></div>
-          <div class="ab">
-            <button class="a" id="kA" aria-label="A 버튼: 선택">A</button><button class="b" id="kB" aria-label="B 버튼: 꺼내기">B</button>
-            <small class="la">선택</small><small class="lb">꺼내기</small>
+          <div class="rcol">
+            <div class="ab">
+              <button class="a" id="kA" aria-label="A 버튼: 선택">A</button><button class="b" id="kB" aria-label="B 버튼: 꺼내기">B</button>
+              <small class="la">선택</small><small class="lb">꺼내기</small>
+            </div>
+            <div class="startwrap"><button class="startbtn" id="kStart" aria-label="START: 꽂은 게임을 새 창에서 플레이"></button><small>START</small></div>
           </div>
-          <div class="keys"><b>마우스</b> 카트리지 클릭 = 꽂기 · 화면 양옆 ◀▶ = 장면 바꾸기 · 설명서 탭 = 쪽 넘기기<span class="row2"><b>키보드</b> ← → 설명서 · ↑ ↓ 장면 · Enter = A · Esc = B · 1~3 카트리지</span></div>
+          <div class="keys"><b>마우스</b> 카트리지 클릭 = 꽂기 · START = 게임 플레이 · 화면 양옆 ◀▶ = 장면 바꾸기 · 설명서 탭 = 쪽 넘기기<span class="row2"><b>키보드</b> ← → 설명서 · ↑ ↓ 장면 · Enter = A · Esc = B · Space = START · 1~3 카트리지</span></div>
         </div>
       </div>
     </section>
@@ -260,9 +276,11 @@ const fmt=t=>escH(t).replace(/`([^`]+)`/g,'<code>$1</code>');
 const encPath=p=>String(p).replace(/^\.\//,'').split('/').map(encodeURIComponent).join('/');
 const srcPath=(id,rel)=>`src/${encodeURIComponent(id)}/${encPath(rel)}`;
 const safeUrl=u=>/^https?:\/\//.test(u||'')?escH(u):'';
+const playUrl=u=>(/^https?:\/\//.test(u||'')||/^[\w./-]+(\?[\w=&.%-]*)?$/.test(u||''))?escH(u):''; // http 주소 또는 레포 안 상대 경로(play.html?g=…)
 async function getJSON(u){const r=await fetch(u,{cache:'no-cache'});if(!r.ok)throw new Error(u+' '+r.status);return r.json()}
 async function loadData(){
   const pf=await getJSON('data/portfolio.json');
+  let PLAY={};try{PLAY=await getJSON('play.json')}catch(e){}
   const list=await Promise.all(pf.projects.map(id=>getJSON(`data/projects/${encodeURIComponent(id)}.json`)));
   const pr=pf.profile||{};
   return {
@@ -281,6 +299,7 @@ async function loadData(){
         troubles:(d.troubleshooting||[]).map(t=>({title:escH(t.title),problem:fmt(t.problem),cause:fmt(t.cause),solution:fmt(t.solution)})),
         achieved:(d.retro?.achieved||[]).slice(0,4).map(fmt),
         github:safeUrl(d.links?.github),video:safeUrl(d.links?.video),
+        play:playUrl(PLAY[d.id]||((d.links?.extra||[]).find(x=>/플레이|play|webgl|itch/i.test(x.label||''))||{}).url),
         img:d.cover?srcPath(d.id,d.cover):(gif?srcPath(d.id,gif.src):''),
         gif:gif?srcPath(d.id,gif.src):(d.cover?srcPath(d.id,d.cover):'')};
     })};
@@ -311,7 +330,8 @@ const SYS_PAGES=[
     <kbd>◀ ▶</kbd><span>설명서 쪽 넘기기 (위의 탭을 눌러도 됩니다)</span>
     <kbd>▲ ▼</kbd><span>게임기 화면 장면 바꾸기 (화면 양옆 화살표를 눌러도 됩니다)</span>
     <kbd>A</kbd><span>다음 쪽 · 카트리지가 없으면 첫 번째 게임 꽂기</span>
-    <kbd>B</kbd><span>카트리지 꺼내기</span></div>`],
+    <kbd>B</kbd><span>카트리지 꺼내기</span>
+    <kbd>START</kbd><span>꽂은 게임을 새 창에서 직접 플레이 (Space 키도 됩니다)</span></div>`],
   ['보유 스킬',()=>`<h3>보유 스킬</h3><div class="sk">${DATA.skills.map(k=>`<div><b>${k.name}<small>×${new Set(k.ev.map(e=>e.project)).size} 프로젝트</small></b><ul>${k.ev.map(e=>`<li>${e.text}</li>`).join('')}</ul></div>`).join('')}</div>`],
   ['연락처',()=>`<h3>연락처</h3><dl class="spec"><dt>EMAIL</dt><dd>${prof.email}</dd>${prof.github?`<dt>GITHUB</dt><dd>${prof.github.replace('https://','')}</dd>`:''}</dl>
     <div class="mlinks">${prof.github?`<a href="${prof.github}" target="_blank" rel="noopener">GitHub 열기 ↗</a>`:''}<a href="portfolio.html">문서형 포트폴리오 ↗</a></div>
@@ -320,7 +340,8 @@ const SYS_PAGES=[
 function projPages(p){return [
   ['게임 소개',()=>`<h3>게임 소개</h3><p class="lead">${p.tagline}</p>
     <dl class="spec"><dt>장르</dt><dd>${p.genre}</dd><dt>기간</dt><dd>${p.period}</dd><dt>인원</dt><dd>${p.team}</dd><dt>내 역할</dt><dd>${p.role}</dd></dl>
-    <div class="mchips">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>`],
+    <div class="mchips">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+    ${p.play?`<div class="mlinks" style="margin-top:18px"><a class="play" href="${p.play}" target="_blank" rel="noopener">▶ 웹에서 플레이 (새 창)</a></div>`:''}`],
   ['주요 기능',()=>`<h3>주요 기능</h3><div class="feat">${p.highlights.map((h,i)=>`<div><span class="n">${i+1}</span><b>${h.title}</b><p>${h.what}${h.img?`<button class="thumb" data-src="${h.img}" aria-label="${h.cap} 게임기 화면에서 보기"><img src="${h.img}" alt="${h.cap}" loading="lazy"><span>화면에서 보기 ▶</span></button>`:''}</p></div>`).join('')}</div>`],
   ['버그 수정 기록',()=>`<h3>버그 수정 기록</h3>${p.troubles.map((t,i)=>`<div class="bug"><b>#${i+1} ${t.title}</b><dl><dt class="p">증상</dt><dd>${t.problem}</dd><dt class="c">원인</dt><dd>${t.cause}</dd><dt class="s">해결</dt><dd>${t.solution}</dd></dl></div>`).join('')}`],
   ['클리어 기록',()=>`<h3>클리어 기록</h3><ul class="ok">${p.achieved.map(a=>`<li>${a}</li>`).join('')}</ul>
@@ -387,15 +408,29 @@ function boot(i){
   const b=document.createElement('div'); b.className='boot'; b.innerHTML=`<div><div class="logo">${P[i].en.toUpperCase()}</div><small>SY-01 · ${P[i].teamType==='team'?'TEAM':'SOLO'} PROJECT</small></div>`;
   $('#screen').appendChild(b);
   renderManual(true);
-  setTimeout(()=>{b.remove();renderScreen();busy=false;restartAuto()},reduce?50:1000);
+  setTimeout(()=>{b.remove();renderScreen();busy=false;restartAuto();updateStart()},reduce?50:1000);
 }
 function eject(after){
   if(loaded===null||busy)return; busy=true;
   const p=P[loaded], slot=$('#inserted');
   slot.animate([{transform:'translateY(0)'},{transform:'translateY(-130px)'}],{duration:reduce?1:260,easing:'ease-out'}).onfinish=()=>{
     slot.classList.remove('on');$('#cart-'+p.key).classList.remove('gone');$('#led').classList.remove('on');
-    loaded=null;page=0;clearInterval(autoT);renderManual(true);renderScreen();busy=false;after&&after()};
+    loaded=null;page=0;clearInterval(autoT);renderManual(true);renderScreen();updateStart();busy=false;after&&after()};
 }
+
+// START: 꽂은 게임을 새 창에서 플레이
+function toast(title,msg,ms=2200){const t=document.createElement('div');t.className='toast';t.innerHTML=`<div><b>${title}</b><p>${msg}</p></div>`;
+  $('#screen').appendChild(t);t.onclick=()=>t.remove();setTimeout(()=>t.remove(),ms)}
+function updateStart(){$('.startwrap').classList.toggle('ready',loaded!==null&&!!P[loaded]?.play)}
+function startGame(){
+  if(busy)return;
+  if(loaded===null){toast('NO CARTRIDGE','먼저 선반에서 카트리지를 꽂아 주세요');return}
+  const p=P[loaded];
+  if(!p.play){toast('PLAY 준비 중',`${p.title}은(는) 아직 웹 플레이 버전이 없어요.${p.video?`<br><a href="${p.video}" target="_blank" rel="noopener">플레이 영상 보기 ↗</a>`:''}`,3500);return}
+  const w=window.open(p.play,'_blank');if(w)try{w.opener=null}catch(e){}
+  toast('GAME START!',w===null?`새 창이 막혔어요. <a href="${p.play}" target="_blank" rel="noopener">여기를 눌러 열기 ↗</a>`:`${p.title}을(를) 새 창에서 실행했어요`,w===null?6000:2200);
+}
+$('#kStart').onclick=startGame;
 
 // 버튼
 $('#kL').onclick=()=>turn(-1); $('#kR').onclick=()=>turn(1);
@@ -412,6 +447,7 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();eject()}
   else if(/^[1-9]$/.test(e.key)&&+e.key<=P.length)insert(+e.key-1);
   else if(e.key==='Enter'&&!e.target.closest('button,a'))$('#kA').click();
+  else if(e.key===' '&&!e.target.closest('button,a')){e.preventDefault();startGame()}
 });
 document.title=new DOMParser().parseFromString(`${prof.name} · 포트폴리오`,'text/html').documentElement.textContent;
 $('#brandName').innerHTML=`${prof.nameEn.toUpperCase()} · GAME SHELF`;
