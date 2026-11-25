@@ -341,7 +341,7 @@ function projPages(p){return [
   ['게임 소개',()=>`<h3>게임 소개</h3><p class="lead">${p.tagline}</p>
     <dl class="spec"><dt>장르</dt><dd>${p.genre}</dd><dt>기간</dt><dd>${p.period}</dd><dt>인원</dt><dd>${p.team}</dd><dt>내 역할</dt><dd>${p.role}</dd></dl>
     <div class="mchips">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
-    ${p.play?`<div class="mlinks" style="margin-top:18px"><a class="play" href="${p.play}" target="_blank" rel="noopener">▶ 웹에서 플레이 (새 창)</a></div>`:''}`],
+    ${p.play?`<div class="mlinks" style="margin-top:18px"><a class="play" href="${p.play}" target="_blank" rel="noopener">▶ GAME START</a></div>`:''}`],
   ['주요 기능',()=>`<h3>주요 기능</h3><div class="feat">${p.highlights.map((h,i)=>`<div><span class="n">${i+1}</span><b>${h.title}</b><p>${h.what}${h.img?`<button class="thumb" data-src="${h.img}" aria-label="${h.cap} 게임기 화면에서 보기"><img src="${h.img}" alt="${h.cap}" loading="lazy"><span>화면에서 보기 ▶</span></button>`:''}</p></div>`).join('')}</div>`],
   ['버그 수정 기록',()=>`<h3>버그 수정 기록</h3>${p.troubles.map((t,i)=>`<div class="bug"><b>#${i+1} ${t.title}</b><dl><dt class="p">증상</dt><dd>${t.problem}</dd><dt class="c">원인</dt><dd>${t.cause}</dd><dt class="s">해결</dt><dd>${t.solution}</dd></dl></div>`).join('')}`],
   ['클리어 기록',()=>`<h3>클리어 기록</h3><ul class="ok">${p.achieved.map(a=>`<li>${a}</li>`).join('')}</ul>
