@@ -704,6 +704,33 @@ yield return StartCoroutine(temple.BuildTempleChainSequence());
 ```mermaid
 %%{init: {'theme':'neutral'}}%%
 gantt
+    title 개발 일정 타임라인
+    dateFormat YYYY-MM-DD
+    axisFormat %m/%d
+
+    section 1단계: 코어 메커니즘 & 프로토타입
+    이동 · 대시 · 장애물 충돌 첫 구현                  :done, p1, 2026-06-24, 1d
+    BGM · 장애물 경고 · 클리어 · 음악루프 · 게임오버 (8.1) :done, p2, 2026-06-25, 1d
+    대시 무적 · 체력(PlayerHP) · 잔상 · 메인 디자인     :done, p3, 2026-06-26, 2026-06-29
+
+    section 2단계: 보스 기믹 & 시스템 리팩토링
+    잔상 재작성(8.2) · 보스 씬 · 회전/레이저/내려찍기   :done, p4, 2026-06-29, 2026-07-02
+    게임오버 UI · LevelManager · StageTransition · 폴더 정리 :done, p5, 2026-07-02, 1d
+    튜토리얼 Phase1~4 · CircleObstacle · MusicLoopManager(8.3) :done, p6, 2026-07-03, 1d
+
+    section 3단계: 스테이지 완성 & 통합
+    Phase5~9 · 톱니바퀴 (튜토리얼 9구간 완성)           :done, p7, 2026-07-05, 1d
+    보스 신전 패턴 · 크레딧 · TransitionManager (전체 루프 완성) :done, p8, 2026-07-06, 2026-07-08
+      최종 마무리                                       :milestone, m1, 2026-07-09, 0d
+```
+
+
+
+
+
+```mermaid
+%%{init: {'theme':'neutral'}}%%
+gantt
     dateFormat YYYY-MM-DD
     axisFormat %m/%d
     tickInterval 1day
