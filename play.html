@@ -99,6 +99,9 @@ select.tbtn option{background:#221d2b}
   const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const g=(new URLSearchParams(location.search).get('g')||'').replace(/[^\w\-.]/g,'');
   const ASPECT=16/9;
+  // 게임 내부 해상도: 화면에 보이는 크기와 상관없이 세로 RENDER_H 픽셀로 그림(에디터의 1920×1080과 같게). ?h=720 처럼 바꿀 수 있음
+  const RENDER_H=Math.max(360,Math.min(2160,parseInt(new URLSearchParams(location.search).get('h'))||1080));
+  const dprFor=()=>RENDER_H/Math.max(1,document.fullscreenElement?screen.height:box.clientHeight);
   const canvas=$('#unity-canvas'), box=$('#unity-container'), area=$('#stageArea'), sizeSel=$('#size');
   let instance=null;
 
@@ -111,8 +114,10 @@ select.tbtn option{background:#221d2b}
     if(sizeSel.value!=='fit')w=Math.min(w,+sizeSel.value);
     w=Math.max(280,Math.floor(w));
     box.style.width=w+'px'; box.style.height=Math.round(w/ASPECT)+'px';
+    if(instance&&instance.Module)instance.Module.devicePixelRatio=dprFor();
   }
   sizeSel.onchange=layout; addEventListener('resize',layout); layout();
+  document.addEventListener('fullscreenchange',()=>{if(instance&&instance.Module)instance.Module.devicePixelRatio=dprFor()});
   $('#fs').onclick=()=>{ if(instance) instance.SetFullscreen(1); else if(box.requestFullscreen) box.requestFullscreen().catch(()=>{}); };
   if(/iPhone|iPad|Android/i.test(navigator.userAgent)) $('#mwarn').classList.add('on');
 
@@ -148,7 +153,7 @@ select.tbtn option{background:#221d2b}
       createUnityInstance(canvas,{
         dataUrl:base+'.data'+ext, frameworkUrl:base+'.framework.js'+ext, codeUrl:base+'.wasm'+ext,
         streamingAssetsUrl:`Games/${encodeURIComponent(g)}/StreamingAssets`,
-        companyName:'SY-01', productName:g, productVersion:'1.0',
+        companyName:'SY-01', productName:g, productVersion:'1.0', devicePixelRatio:dprFor(),
         showBanner:(msg,type)=>{if(type==='error')fail('ERROR',esc(msg))}
       },p=>{$('#bar').style.width=Math.round(p*100)+'%'}).then(inst=>{
         instance=inst; $('#load').style.display='none'; canvas.focus();
