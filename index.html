@@ -96,7 +96,7 @@ h2.t{font-family:"Galmuri14",var(--px);font-size:clamp(18px,2.4vw,32px);color:#f
 .menu span:not(.sel){padding-left:1.3em;color:var(--scrDim)}
 .blink{animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
 .boot{position:absolute;inset:0;display:grid;place-items:center;background:var(--scr);z-index:3;text-align:center}
-.boot .logo{font-family:"Galmuri14",var(--px);font-size:clamp(20px,3.4vw,34px);color:#fff;animation:drop .7s cubic-bezier(.2,1.5,.4,1) both}
+.boot .logo{white-space:pre-line;line-height:1.25;font-family:"Galmuri14",var(--px);font-size:clamp(20px,3.4vw,34px);color:#fff;animation:drop .7s cubic-bezier(.2,1.5,.4,1) both}
 .boot small{display:block;font-size:12px;color:var(--scrDim);margin-top:10px;animation:fade .4s .5s both}
 @keyframes drop{0%{transform:translateY(-120%);opacity:0}100%{transform:none;opacity:1}}
 @keyframes fade{from{opacity:0}}
@@ -290,7 +290,9 @@ async function loadData(){
       const meta={};(d.meta||[]).forEach(m=>meta[m.label]=m.value);
       const shots=d.screenshots||[];const gif=shots.find(x=>/\.gif$/i.test(x.src))||shots[0];
       const en=String(d.id).replace(/^\d+[-_. ]*/,'').replace(/[-_ ]+/g,'')||d.id;
-      return {id:d.id,key:'p'+i,en:escH(en),color:COLORS[i%COLORS.length],title:escH(d.title),tagline:escH(d.tagline),
+      const words=String(d.id).replace(/^\d+[-_. ]*/,'').replace(/([a-z])([A-Z])/g,'$1 $2').split(/[-_ ]+/).filter(Boolean).join(' ').toUpperCase();
+      const boot=words.replace(/ (AND|&) /g,'\n$1\n');
+      return {id:d.id,key:'p'+i,en:escH(en),boot:escH(boot||en.toUpperCase()),color:COLORS[i%COLORS.length],title:escH(d.title),tagline:escH(d.tagline),
         genre:escH(meta['장르']||''),period:escH(meta['기간']||''),team:escH(meta['인원']||d.team?.size||''),
         role:escH(d.team?.role||''),teamType:d.team?.type==='team'?'team':'solo',tags:(d.tags||[]).map(escH),
         highlights:(d.highlights||[]).map(h=>({title:escH(h.title),what:fmt(h.what),img:h.image?.src?srcPath(d.id,h.image.src):'',cap:escH(h.image?.caption?.text||h.title)})),
@@ -405,7 +407,7 @@ function insert(i){
 function boot(i){
   $('#led').classList.add('on'); loaded=i; page=0; shot=0;
   const s=$('#scr'); s.innerHTML=''; s.classList.add('off');
-  const b=document.createElement('div'); b.className='boot'; b.innerHTML=`<div><div class="logo">${P[i].en.toUpperCase()}</div><small>SY-01 · ${P[i].teamType==='team'?'TEAM':'SOLO'} PROJECT</small></div>`;
+  const b=document.createElement('div'); b.className='boot'; b.innerHTML=`<div><div class="logo">${P[i].boot}</div><small>SY-01 · ${P[i].teamType==='team'?'TEAM':'SOLO'} PROJECT</small></div>`;
   $('#screen').appendChild(b);
   renderManual(true);
   setTimeout(()=>{b.remove();renderScreen();busy=false;restartAuto();updateStart()},reduce?50:1000);
